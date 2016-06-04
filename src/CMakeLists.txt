@@ -3,9 +3,18 @@ include_directories(
 
 add_executable(swgchat
     main.cpp
-    ServiceContainer.hpp
+    RegistrarClient.cpp
+    RegistrarClient.hpp
+    RegistrarService.cpp
+    RegistrarService.hpp
+    Request.hpp
+    Response.hpp
     SwgChatApp.cpp
     SwgChatApp.hpp)
 
 target_link_libraries(swgchat
     udplibrary)
+
+if(WIN32)
+    target_link_libraries(swgchat ws2_32)
+endif()
