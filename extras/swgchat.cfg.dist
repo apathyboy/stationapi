@@ -1,0 +1,14 @@
+# Address that the gateway server will listen for connections on
+gateway_address = 127.0.0.1
+
+# Port the gateway server will listen for connections on
+gateway_port = 5001
+
+# Address that the registrar server will listen for connections on
+registrar_address = 127.0.0.1
+
+# Port the registrar server will listen for connections on
+registrar_port = 5000
+
+# Path to the application database
+database_path = chat.db
