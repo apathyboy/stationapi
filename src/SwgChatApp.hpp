@@ -3,9 +3,9 @@
 
 #include "RegistrarService.hpp"
 
+#include <cstdint>
 #include <memory>
 #include <string>
-#include <cstdint>
 
 class SwgChatApp {
 public:

@@ -10,8 +10,7 @@ public:
     UdpConnection* GetConnection() { return connection_; }
 
 private:
-    void OnRoutePacket(UdpConnection* connection, const uchar* data,
-        int length) override;
+    void OnRoutePacket(UdpConnection* connection, const uchar* data, int length) override;
 
     UdpConnection* connection_;
 };

@@ -18,7 +18,7 @@ public:
     void Tick();
 
 private:
-    virtual void OnConnectRequest(UdpConnection* connection) override;
+    void OnConnectRequest(UdpConnection* connection) override;
     std::vector<std::unique_ptr<RegistrarClient>> clients_;
 
     UdpManager* udpManager_;
