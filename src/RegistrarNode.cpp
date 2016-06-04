@@ -5,6 +5,7 @@
 #include "UdpLibrary.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 RegistrarNode::RegistrarNode(ServiceContainer* services)
     : services_{services} {
@@ -13,6 +14,8 @@ RegistrarNode::RegistrarNode(ServiceContainer* services)
     UdpManager::Params params;
     params.handler = this;
     params.port = config->registrarPort;
+
+    std::cout << "Listening on port " << config->registrarPort << "\n";
 
     udpManager_ = new UdpManager(&params);
 }
@@ -26,9 +29,12 @@ void RegistrarNode::AddClient(std::unique_ptr<RegistrarClient> client) {
 void RegistrarNode::Tick() {
     udpManager_->GiveTime();
 
-    clients_.erase(std::remove_if(std::begin(clients_), std::end(clients_), [](auto& client) {
+    auto& remove_iter = std::remove_if(std::begin(clients_), std::end(clients_), [](auto& client) {
         return client->GetConnection()->GetStatus() == UdpConnection::cStatusDisconnected;
-    }));
+    });
+
+    if (remove_iter != std::end(clients_))
+        clients_.erase(remove_iter);
 }
 
 void RegistrarNode::OnConnectRequest(UdpConnection* connection) {

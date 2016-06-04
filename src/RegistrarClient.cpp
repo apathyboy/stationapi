@@ -3,21 +3,20 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "ServiceContainer.hpp"
+#include "StreamUtils.hpp"
+
+#include <iostream>
 
 RegistrarClient::RegistrarClient(UdpConnection* connection, ServiceContainer* services)
-    : connection_{connection}
+    : NodeClient<2048>(connection)
     , services_{services} {
-    connection_->AddRef();
-    connection_->SetHandler(this);
+    connection->SetHandler(this);
 }
 
-RegistrarClient::~RegistrarClient() {
-    connection_->SetHandler(nullptr);
-    connection_->Disconnect();
-    connection_->Release();
-}
+RegistrarClient::~RegistrarClient() {}
 
 void RegistrarClient::OnRoutePacket(UdpConnection* connection, const uchar* data, int length) {
+    logNetworkMessage(connection, "Registrar Message From", data, length);
 
     BinarySourceStream istream{reinterpret_cast<const char*>(data), length};
     ChatRequestType request_type = static_cast<ChatRequestType>(read<uint16_t>(istream));
@@ -39,5 +38,5 @@ void RegistrarClient::HandleGetChatServer(BinarySourceStream& istream) {
         std::wstring(std::begin(config->gatewayAddress), std::end(config->gatewayAddress)),
         config->gatewayPort};
 
-    SendMessage(connection_, response);
+    SendMessage(response);
 }
