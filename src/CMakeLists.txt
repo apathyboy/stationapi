@@ -1,16 +1,22 @@
 include_directories(
-    ${PROJECT_SOURCE_DIR}/udplibrary)
+    ${PROJECT_SOURCE_DIR}/udplibrary
+    ${Boost_INCLUDE_DIRS})
 
 add_executable(swgchat
+    BinaryStream.hpp
     main.cpp
+    NodeClient.hpp
     RegistrarClient.cpp
     RegistrarClient.hpp
-    RegistrarService.cpp
-    RegistrarService.hpp
+    RegistrarNode.cpp
+    RegistrarNode.hpp
     Request.hpp
     Response.hpp
+    Serialization.hpp
+    ServiceContainer.hpp
     SwgChatApp.cpp
-    SwgChatApp.hpp)
+    SwgChatApp.hpp
+    SwgChatConfig.hpp)
 
 target_link_libraries(swgchat
     udplibrary)

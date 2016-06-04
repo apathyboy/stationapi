@@ -1,7 +1,8 @@
 
 #pragma once
 
-#include "RegistrarService.hpp"
+#include "RegistrarNode.hpp"
+#include "ServiceContainer.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -9,8 +10,7 @@
 
 class SwgChatApp {
 public:
-    SwgChatApp(const std::string& gatewayAddress, uint16_t gatewayPort,
-        const std::string& registrarAddress, uint16_t registrarPort);
+    explicit SwgChatApp(SwgChatConfig config);
 
     bool IsRunning() const { return isRunning_; }
 
@@ -18,5 +18,6 @@ public:
 
 private:
     bool isRunning_ = true;
-    std::unique_ptr<RegistrarService> registrarService_;
+    std::unique_ptr<RegistrarNode> registrarNode_;
+    std::unique_ptr<ServiceContainer> services_;
 };

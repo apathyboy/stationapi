@@ -5,7 +5,7 @@
 #include <thread>
 
 int main() {
-    SwgChatApp app{"", 5001, "", 5000};
+    SwgChatApp app{{"", 5001, "", 5000}};
 
     while (app.IsRunning()) {
         app.Tick();

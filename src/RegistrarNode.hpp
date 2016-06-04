@@ -7,11 +7,12 @@
 #include <vector>
 
 class RegistrarClient;
+class ServiceContainer;
 
-class RegistrarService : public UdpManagerHandler {
+class RegistrarNode : public UdpManagerHandler {
 public:
-    RegistrarService(const std::string& registrarAddress, uint16_t registrarPort);
-    ~RegistrarService();
+    RegistrarNode(ServiceContainer* services);
+    ~RegistrarNode();
 
     void AddClient(std::unique_ptr<RegistrarClient> client);
 
@@ -21,5 +22,6 @@ private:
     void OnConnectRequest(UdpConnection* connection) override;
     std::vector<std::unique_ptr<RegistrarClient>> clients_;
 
+    ServiceContainer* services_;
     UdpManager* udpManager_;
 };

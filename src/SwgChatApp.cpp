@@ -1,8 +1,8 @@
 #include "SwgChatApp.hpp"
 
-SwgChatApp::SwgChatApp(const std::string& gatewayAddress, uint16_t gatewayPort,
-    const std::string& registrarAddress, uint16_t registrarPort) {
-    registrarService_ = std::make_unique<RegistrarService>(registrarAddress, registrarPort);
+SwgChatApp::SwgChatApp(SwgChatConfig config) {
+    services_ = std::make_unique<ServiceContainer>(std::move(config));
+    registrarNode_ = std::make_unique<RegistrarNode>(services_.get());
 }
 
-void SwgChatApp::Tick() { registrarService_->Tick(); }
+void SwgChatApp::Tick() { registrarNode_->Tick(); }

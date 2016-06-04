@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "Serialization.hpp"
+
 #include <cstdint>
 #include <string>
 
@@ -82,9 +84,25 @@ enum class ChatRequestType : uint16_t {
     REGISTRAR_GETCHATSERVER = 20001,
 };
 
+struct InvalidRequestType : public std::runtime_error {
+    InvalidRequestType(uint16_t real_type, uint16_t request_type)
+        : std::runtime_error("Invalid request data. Expected " + std::to_string(real_type)
+            + " Given: " + std::to_string(request_type)) {}
+};
+
+/** Begin REGISTRAR_GETCHATSERVER */
+
 struct ReqRegistrarGetChatServer {
     const uint16_t type = static_cast<uint16_t>(ChatRequestType::REGISTRAR_GETCHATSERVER);
     uint32_t track;
     std::wstring hostname;
     uint16_t port;
 };
+
+template <typename StreamT>
+void read(StreamT& ar, ReqRegistrarGetChatServer& data)
+{
+    read(ar, data.track);
+    read(ar, data.hostname);
+    read(ar, data.port);
+}
