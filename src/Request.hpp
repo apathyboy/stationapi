@@ -87,8 +87,22 @@ enum class ChatRequestType : uint16_t {
 struct InvalidRequestType : public std::runtime_error {
     InvalidRequestType(uint16_t real_type, uint16_t request_type)
         : std::runtime_error("Invalid request data. Expected " + std::to_string(real_type)
-            + " Given: " + std::to_string(request_type)) {}
+              + " Given: " + std::to_string(request_type)) {}
 };
+
+/** Begin SETAPIVERSION */
+
+struct ReqSetApiVersion {
+    const uint16_t type = static_cast<uint16_t>(ChatRequestType::SETAPIVERSION);
+    uint32_t track;
+    uint32_t version;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqSetApiVersion& data) {
+    read(ar, data.track);
+    read(ar, data.version);
+}
 
 /** Begin REGISTRAR_GETCHATSERVER */
 
@@ -100,8 +114,7 @@ struct ReqRegistrarGetChatServer {
 };
 
 template <typename StreamT>
-void read(StreamT& ar, ReqRegistrarGetChatServer& data)
-{
+void read(StreamT& ar, ReqRegistrarGetChatServer& data) {
     read(ar, data.track);
     read(ar, data.hostname);
     read(ar, data.port);

@@ -13,6 +13,8 @@ public:
 
 private:
     void OnIncoming(BinarySourceStream& istream) override;
+
+    void HandleSetApiVersion(BinarySourceStream& istream);
     
     ServiceContainer* services_;
 };

@@ -35,9 +35,10 @@ public:
         OnTick();
     }
 
+private:
+
     virtual void OnTick() = 0;
 
-private:
     void OnConnectRequest(UdpConnection* connection) override {
         AddClient(std::make_unique<ClientT>(connection, services_));
     }
