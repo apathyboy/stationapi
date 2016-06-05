@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "BinaryStream.hpp"
 #include "StreamUtils.hpp"
 #include "UdpHandler.hpp"
 

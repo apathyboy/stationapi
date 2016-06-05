@@ -4,9 +4,6 @@
 #include "Node.hpp"
 #include "RegistrarClient.hpp"
 
-#include <memory>
-#include <vector>
-
 class ServiceContainer;
 
 class RegistrarNode : public Node<RegistrarNode, RegistrarClient> {

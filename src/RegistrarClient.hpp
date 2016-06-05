@@ -1,11 +1,10 @@
 
 #pragma once
 
-#include "BinaryStream.hpp"
 #include "NodeClient.hpp"
-#include "UdpLibrary.hpp"
 
 class ServiceContainer;
+class UdpConnection;
 
 class RegistrarClient : public NodeClient<2048> {
 public:

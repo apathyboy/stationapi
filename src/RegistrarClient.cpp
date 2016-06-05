@@ -4,8 +4,7 @@
 #include "Response.hpp"
 #include "ServiceContainer.hpp"
 #include "StringUtils.hpp"
-
-#include <iostream>
+#include "UdpLibrary.hpp"
 
 RegistrarClient::RegistrarClient(UdpConnection* connection, ServiceContainer* services)
     : NodeClient<2048>(connection)

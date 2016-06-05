@@ -2,7 +2,7 @@
 #pragma once
 
 #include "ServiceContainer.hpp"
-#include "UdpHandler.hpp"
+#include "UdpLibrary.hpp"
 
 #include <memory>
 #include <vector>
@@ -37,7 +37,7 @@ public:
 
 private:
     void OnConnectRequest(UdpConnection* connection) override {
-        AddClient(std::make_unique<RegistrarClient>(connection, services_));
+        AddClient(std::make_unique<ClientT>(connection, services_));
     }
 
     void AddClient(std::unique_ptr<ClientT> client) { clients_.push_back(std::move(client)); }

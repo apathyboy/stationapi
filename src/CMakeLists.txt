@@ -4,6 +4,10 @@ include_directories(
 
 add_executable(swgchat
     BinaryStream.hpp
+    GatewayClient.cpp
+    GatewayClient.hpp
+    GatewayNode.cpp
+    GatewayNode.hpp
     main.cpp
     Node.hpp
     NodeClient.hpp
