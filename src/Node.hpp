@@ -31,6 +31,8 @@ public:
 
         if (remove_iter != std::end(clients_))
             clients_.erase(remove_iter);
+
+        OnTick();
     }
 
     virtual void OnTick() = 0;
