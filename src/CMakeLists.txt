@@ -5,6 +5,7 @@ include_directories(
 add_executable(swgchat
     BinaryStream.hpp
     main.cpp
+    Node.hpp
     NodeClient.hpp
     RegistrarClient.cpp
     RegistrarClient.hpp
@@ -16,6 +17,8 @@ add_executable(swgchat
     ServiceContainer.hpp
     StreamUtils.cpp
     StreamUtils.hpp
+    StringUtils.cpp
+    StringUtils.hpp
     SwgChatApp.cpp
     SwgChatApp.hpp
     SwgChatConfig.hpp)

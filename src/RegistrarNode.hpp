@@ -1,27 +1,21 @@
 
 #pragma once
 
-#include "UdpHandler.hpp"
+#include "Node.hpp"
+#include "RegistrarClient.hpp"
 
 #include <memory>
 #include <vector>
 
-class RegistrarClient;
 class ServiceContainer;
 
-class RegistrarNode : public UdpManagerHandler {
+class RegistrarNode : public Node<RegistrarNode, RegistrarClient> {
 public:
     RegistrarNode(ServiceContainer* services);
     ~RegistrarNode();
 
-    void AddClient(std::unique_ptr<RegistrarClient> client);
-
-    void Tick();
-
 private:
-    void OnConnectRequest(UdpConnection* connection) override;
-    std::vector<std::unique_ptr<RegistrarClient>> clients_;
+    void OnTick() override;
 
     ServiceContainer* services_;
-    UdpManager* udpManager_;
 };
