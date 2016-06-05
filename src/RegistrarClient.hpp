@@ -7,13 +7,13 @@
 
 class ServiceContainer;
 
-class RegistrarClient : public UdpConnectionHandler, public NodeClient<2048> {
+class RegistrarClient : public NodeClient<2048> {
 public:
     RegistrarClient(UdpConnection* connection, ServiceContainer* services);
     virtual ~RegistrarClient();
 
 private:
-    void OnRoutePacket(UdpConnection* connection, const uchar* data, int length) override;
+    void OnIncoming(BinarySourceStream& istream) override;
 
     void HandleGetChatServer(BinarySourceStream& istream);
 

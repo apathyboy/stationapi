@@ -15,10 +15,8 @@ RegistrarClient::RegistrarClient(UdpConnection* connection, ServiceContainer* se
 
 RegistrarClient::~RegistrarClient() {}
 
-void RegistrarClient::OnRoutePacket(UdpConnection* connection, const uchar* data, int length) {
-    logNetworkMessage(connection, "Registrar Message From", data, length);
-
-    BinarySourceStream istream{reinterpret_cast<const char*>(data), length};
+void RegistrarClient::OnIncoming(BinarySourceStream & istream)
+{
     ChatRequestType request_type = static_cast<ChatRequestType>(read<uint16_t>(istream));
 
     switch (request_type) {
