@@ -11,11 +11,19 @@ cmake_minimum_required(VERSION 3.0)
 
 project(swgchat CXX)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(ModernCpp)
+
 add_definitions(-DBOOST_ALL_NO_LIB)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 
 find_package(Boost REQUIRED)
+
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
+endif ()
 
 add_subdirectory(src)
 add_subdirectory(udplibrary)
