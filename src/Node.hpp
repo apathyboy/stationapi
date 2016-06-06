@@ -4,8 +4,10 @@
 #include "ServiceContainer.hpp"
 #include "UdpLibrary.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <vector>
+#include <cstdint>
 
 template <typename NodeT, typename ClientT>
 class Node : public UdpManagerHandler {
@@ -25,7 +27,7 @@ public:
     void Tick() {
         udpManager_->GiveTime();
 
-        auto& remove_iter = std::remove_if(std::begin(clients_), std::end(clients_), [](auto& client) {
+        auto remove_iter = std::remove_if(std::begin(clients_), std::end(clients_), [](auto& client) {
             return client->GetConnection()->GetStatus() == UdpConnection::cStatusDisconnected;
         });
 

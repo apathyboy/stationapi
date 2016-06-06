@@ -3,11 +3,9 @@
 
 #include "BinaryStream.hpp"
 #include "StreamUtils.hpp"
-#include "UdpHandler.hpp"
+#include "UdpLibrary.hpp"
 
 #include <array>
-
-class UdpConnection;
 
 template <int N>
 class NodeClient : public UdpConnectionHandler {
