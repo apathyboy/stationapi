@@ -15,7 +15,7 @@ GatewayClient::GatewayClient(UdpConnection* connection, ServiceContainer* servic
 GatewayClient::~GatewayClient() {}
 
 void GatewayClient::OnIncoming(BinarySourceStream& istream) {
-    ChatRequestType request_type = static_cast<ChatRequestType>(read<uint16_t>(istream));
+    ChatRequestType request_type = static_cast<ChatRequestType>(::read<uint16_t>(istream));
 
     switch (request_type) {
     case ChatRequestType::SETAPIVERSION:
