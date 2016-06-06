@@ -14,7 +14,7 @@ RegistrarClient::RegistrarClient(UdpConnection* connection, ServiceContainer* se
 RegistrarClient::~RegistrarClient() {}
 
 void RegistrarClient::OnIncoming(BinarySourceStream& istream) {
-    ChatRequestType request_type = static_cast<ChatRequestType>(::read<uint16_t>(istream));
+    ChatRequestType request_type = ::read<ChatRequestType>(istream);
 
     switch (request_type) {
     case ChatRequestType::REGISTRAR_GETCHATSERVER:

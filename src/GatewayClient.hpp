@@ -15,6 +15,7 @@ private:
     void OnIncoming(BinarySourceStream& istream) override;
 
     void HandleSetApiVersion(BinarySourceStream& istream);
+    void HandleGetAnyAvatar(BinarySourceStream& istream);
     
     ServiceContainer* services_;
 };

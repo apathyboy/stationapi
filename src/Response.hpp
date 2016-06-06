@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "ChatAvatar.hpp"
 #include "Serialization.hpp"
 
 #include <cstdint>
@@ -166,23 +167,49 @@ enum class ChatResultCode : uint32_t {
 struct ResSetApiVersion {
     ResSetApiVersion(uint32_t track_, ChatResultCode result_, uint32_t version_)
         : track{track_}
-        , result{static_cast<uint32_t>(result_)}
+        , result{result_}
         , version{version_} {}
 
-    const uint16_t type = static_cast<uint16_t>(ChatResponseType::SETAPIVERSION);
+    const ChatResponseType type = ChatResponseType::SETAPIVERSION;
     uint32_t track;
-    uint32_t result;
+    ChatResultCode result;
     uint32_t version;
 };
 
 template <typename StreamT>
 void write(StreamT& ar, const ResSetApiVersion& data) {
-    using ::write;
-
     write(ar, data.type);
     write(ar, data.track);
     write(ar, data.result);
     write(ar, data.version);
+}
+
+/** Begin GETANYAVATAR */
+
+struct ResGetAnyAvatar {
+    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_, ChatAvatar* avatar_)
+        : track{track_}
+        , result{result_}
+        , isOnline{isOnline_}
+        , avatar{avatar_} {}
+
+    const ChatResponseType type = ChatResponseType::GETANYAVATAR;
+    uint32_t track;
+    ChatResultCode result;
+    bool isOnline;
+    ChatAvatar* avatar;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResGetAnyAvatar& data) {
+    write(ar, static_cast<uint32_t>(data.type));
+    write(ar, data.track);
+    write(ar, static_cast<uint32_t>(data.result));
+    write(ar, data.isOnline);
+
+    if (data.result == ChatResultCode::SUCCESS) {
+        write(ar, *data.avatar);
+    }
 }
 
 /** Begin REGISTRAR_GETCHATSERVER */
@@ -191,13 +218,13 @@ struct ResRegistrarGetChatServer {
     ResRegistrarGetChatServer(
         uint32_t track_, ChatResultCode result_, std::wstring hostname_, uint16_t port_)
         : track{track_}
-        , result{static_cast<uint32_t>(result_)}
+        , result{result_}
         , hostname{hostname_}
         , port{port_} {}
 
-    const uint16_t type = static_cast<uint16_t>(ChatResponseType::REGISTRAR_GETCHATSERVER);
+    const ChatResponseType type = ChatResponseType::REGISTRAR_GETCHATSERVER;
     uint32_t track;
-    uint32_t result;
+    ChatResultCode result;
     std::wstring hostname;
     uint16_t port;
 };

@@ -18,6 +18,20 @@ void write(StreamT& ostream, const T& value) {
     ostream.write(reinterpret_cast<const char*>(&value), sizeof(T));
 }
 
+// enumeration types with integral underlying types
+
+template <typename StreamT, typename T,
+    typename std::enable_if_t<std::is_enum<T>::value, int> = 0>
+    void read(StreamT& istream, T& value) {
+    istream.read(reinterpret_cast<char*>(&value), sizeof(T));
+}
+
+template <typename StreamT, typename T,
+    typename std::enable_if_t<std::is_enum<T>::value, int> = 0>
+    void write(StreamT& ostream, const T& value) {
+    ostream.write(reinterpret_cast<const char*>(&value), sizeof(T));
+}
+
 // boolean types
 
 template <typename StreamT>

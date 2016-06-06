@@ -84,16 +84,34 @@ enum class ChatRequestType : uint16_t {
     REGISTRAR_GETCHATSERVER = 20001,
 };
 
-struct InvalidRequestType : public std::runtime_error {
-    InvalidRequestType(uint16_t real_type, uint16_t request_type)
-        : std::runtime_error("Invalid request data. Expected " + std::to_string(real_type)
-              + " Given: " + std::to_string(request_type)) {}
+/** Begin LOGINAVATAR */
+
+struct ReqLoginAvatar {
+    const ChatRequestType type = ChatRequestType::LOGINAVATAR;
+    uint32_t track;
+    uint32_t userId;
+    std::wstring name;
+    std::wstring address;
+    std::wstring loginLocation;
+    int32_t loginPriority;
+    int32_t loginAttributes;
 };
+
+template <typename StreamT>
+void read(StreamT& ar, ReqLoginAvatar& data) {
+    read(ar, data.track);
+    read(ar, data.userId);
+    read(ar, data.name);
+    read(ar, data.address);
+    read(ar, data.loginLocation);
+    read(ar, data.loginPriority);
+    read(ar, data.loginAttributes);
+}
 
 /** Begin SETAPIVERSION */
 
 struct ReqSetApiVersion {
-    const uint16_t type = static_cast<uint16_t>(ChatRequestType::SETAPIVERSION);
+    const ChatRequestType type = ChatRequestType::SETAPIVERSION;
     uint32_t track;
     uint32_t version;
 };
@@ -104,10 +122,26 @@ void read(StreamT& ar, ReqSetApiVersion& data) {
     read(ar, data.version);
 }
 
+/** Begin GETANYAVATAR */
+
+struct ReqGetAnyAvatar {
+    const ChatRequestType type = ChatRequestType::GETANYAVATAR;
+    uint32_t track;
+    std::wstring name;
+    std::wstring address;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqGetAnyAvatar& data) {
+    read(ar, data.track);
+    read(ar, data.name);
+    read(ar, data.address);
+}
+
 /** Begin REGISTRAR_GETCHATSERVER */
 
 struct ReqRegistrarGetChatServer {
-    const uint16_t type = static_cast<uint16_t>(ChatRequestType::REGISTRAR_GETCHATSERVER);
+    const ChatRequestType type = ChatRequestType::REGISTRAR_GETCHATSERVER;
     uint32_t track;
     std::wstring hostname;
     uint16_t port;
