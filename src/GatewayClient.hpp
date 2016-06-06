@@ -3,12 +3,12 @@
 
 #include "NodeClient.hpp"
 
-class ServiceContainer;
+class GatewayNode;
 class UdpConnection;
 
 class GatewayClient : public NodeClient<2048> {
 public:
-    GatewayClient(UdpConnection* connection, ServiceContainer* services);
+    GatewayClient(UdpConnection* connection, GatewayNode* node);
     virtual ~GatewayClient();
 
 private:
@@ -17,5 +17,5 @@ private:
     void HandleSetApiVersion(BinarySourceStream& istream);
     void HandleGetAnyAvatar(BinarySourceStream& istream);
     
-    ServiceContainer* services_;
+    GatewayNode* node_;
 };

@@ -3,12 +3,12 @@
 
 #include "NodeClient.hpp"
 
-class ServiceContainer;
+class RegistrarNode;
 class UdpConnection;
 
 class RegistrarClient : public NodeClient<2048> {
 public:
-    RegistrarClient(UdpConnection* connection, ServiceContainer* services);
+    RegistrarClient(UdpConnection* connection, RegistrarNode* node);
     virtual ~RegistrarClient();
 
 private:
@@ -16,5 +16,5 @@ private:
 
     void HandleGetChatServer(BinarySourceStream& istream);
 
-    ServiceContainer* services_;
+    RegistrarNode* node_;
 };

@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "ServiceContainer.hpp"
 #include "UdpLibrary.hpp"
 
 #include <algorithm>
@@ -12,8 +11,8 @@
 template <typename NodeT, typename ClientT>
 class Node : public UdpManagerHandler {
 public:
-    explicit Node(ServiceContainer* services, const std::string& listenAddress, uint16_t listenPort)
-        : services_{services} {
+    explicit Node(NodeT* node, const std::string& listenAddress, uint16_t listenPort)
+        : node_{node} {
 
         UdpManager::Params params;
         params.handler = this;
@@ -42,12 +41,12 @@ private:
     virtual void OnTick() = 0;
 
     void OnConnectRequest(UdpConnection* connection) override {
-        AddClient(std::make_unique<ClientT>(connection, services_));
+        AddClient(std::make_unique<ClientT>(connection, node_));
     }
 
     void AddClient(std::unique_ptr<ClientT> client) { clients_.push_back(std::move(client)); }
 
     std::vector<std::unique_ptr<ClientT>> clients_;
-    ServiceContainer* services_;
+    NodeT* node_;
     UdpManager* udpManager_;
 };

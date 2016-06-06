@@ -4,15 +4,17 @@
 #include "Node.hpp"
 #include "RegistrarClient.hpp"
 
-class ServiceContainer;
+struct SwgChatConfig;
 
 class RegistrarNode : public Node<RegistrarNode, RegistrarClient> {
 public:
-    RegistrarNode(ServiceContainer* services);
+    explicit RegistrarNode(SwgChatConfig& config);
     ~RegistrarNode();
+
+    SwgChatConfig& GetConfig();
 
 private:
     void OnTick() override;
 
-    ServiceContainer* services_;
+    SwgChatConfig& config_;
 };

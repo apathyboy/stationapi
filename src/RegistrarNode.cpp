@@ -1,13 +1,17 @@
 
 #include "RegistrarNode.hpp"
 
-#include "ServiceContainer.hpp"
+#include "SwgChatConfig.hpp"
 
-RegistrarNode::RegistrarNode(ServiceContainer* services)
-    : Node(services, services->GetConfig()->registrarAddress, services->GetConfig()->registrarPort)
-    , services_{services} {}
+RegistrarNode::RegistrarNode(SwgChatConfig& config)
+    : Node(this, config.registrarAddress, config.registrarPort)
+    , config_{config} {}
 
 RegistrarNode::~RegistrarNode() {}
+
+SwgChatConfig& RegistrarNode::GetConfig() {
+    return config_;
+}
 
 void RegistrarNode::OnTick() {}
 

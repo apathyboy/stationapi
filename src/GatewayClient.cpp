@@ -1,14 +1,16 @@
 
 #include "GatewayClient.hpp"
 
+#include "ChatAvatarService.hpp"
+#include "GatewayNode.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include "ServiceContainer.hpp"
+#include "SwgChatConfig.hpp"
 #include "UdpLibrary.hpp"
 
-GatewayClient::GatewayClient(UdpConnection* connection, ServiceContainer* services)
+GatewayClient::GatewayClient(UdpConnection* connection, GatewayNode* node)
     : NodeClient<2048>(connection)
-    , services_{services} {
+    , node_{node} {
     connection->SetHandler(this);
 }
 
@@ -31,7 +33,7 @@ void GatewayClient::HandleSetApiVersion(BinarySourceStream& istream) {
     ReqSetApiVersion request;
     read(istream, request);
 
-    uint32_t version = services_->GetConfig()->version;
+    uint32_t version = node_->GetConfig().version;
     ChatResultCode result = (version == request.version)
         ? ChatResultCode::SUCCESS
         : ChatResultCode::WRONGCHATSERVERFORREQUEST;
@@ -44,7 +46,7 @@ void GatewayClient::HandleGetAnyAvatar(BinarySourceStream& istream) {
     read(istream, request);
 
     auto avatar
-        = services_->GetAvatarService()->GetAvatarByNameAndAddress(request.name, request.address);
+        = node_->GetAvatarService()->GetAvatarByNameAndAddress(request.name, request.address);
     ChatResultCode result
         = (avatar) ? ChatResultCode::SUCCESS : ChatResultCode::DESTAVATARDOESNTEXIST;
     bool isOnline = (avatar != nullptr) ? avatar->isOnline : false;

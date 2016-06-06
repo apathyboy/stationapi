@@ -6,11 +6,10 @@
 #include <unordered_map>
 
 struct ChatAvatar;
-struct SwgChatConfig;
 
 class ChatAvatarService {
 public:
-    explicit ChatAvatarService(SwgChatConfig* config);
+    explicit ChatAvatarService();
     ~ChatAvatarService();
 
     ChatAvatar* GetAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
@@ -18,7 +17,5 @@ public:
     ChatAvatar* GetPersistedAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
 
 private:
-    SwgChatConfig* config_;
-
     std::unordered_map<std::wstring, std::unique_ptr<ChatAvatar>> onlineAvatars_;
 };

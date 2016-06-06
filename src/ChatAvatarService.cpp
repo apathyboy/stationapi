@@ -1,10 +1,7 @@
 #include "ChatAvatarService.hpp"
 #include "ChatAvatar.hpp"
 
-#include "ServiceContainer.hpp"
-
-ChatAvatarService::ChatAvatarService(SwgChatConfig* config)
-    : config_{config} {}
+ChatAvatarService::ChatAvatarService() {}
 
 ChatAvatarService::~ChatAvatarService() {}
 

@@ -23,7 +23,6 @@ add_executable(swgchat
     Request.hpp
     Response.hpp
     Serialization.hpp
-    ServiceContainer.hpp
     StreamUtils.cpp
     StreamUtils.hpp
     StringUtils.cpp

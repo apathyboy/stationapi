@@ -1,13 +1,14 @@
 #include "RegistrarClient.hpp"
 
+#include "RegistrarNode.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
-#include "ServiceContainer.hpp"
 #include "StringUtils.hpp"
+#include "SwgChatConfig.hpp"
 
-RegistrarClient::RegistrarClient(UdpConnection* connection, ServiceContainer* services)
+RegistrarClient::RegistrarClient(UdpConnection* connection, RegistrarNode* node)
     : NodeClient<2048>(connection)
-    , services_{services} {
+    , node_{node} {
     connection->SetHandler(this);
 }
 
@@ -26,13 +27,13 @@ void RegistrarClient::OnIncoming(BinarySourceStream& istream) {
 }
 
 void RegistrarClient::HandleGetChatServer(BinarySourceStream& istream) {
-    auto config = services_->GetConfig();
+    auto& config = node_->GetConfig();
 
     ReqRegistrarGetChatServer request;
     read(istream, request);
 
     ResRegistrarGetChatServer response{request.track, ChatResultCode::SUCCESS,
-        ToWideString(config->gatewayAddress), config->gatewayPort};
+        ToWideString(config.gatewayAddress), config.gatewayPort};
 
     SendMessage(response);
 }

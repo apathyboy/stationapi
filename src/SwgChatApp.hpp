@@ -3,7 +3,7 @@
 
 #include "GatewayNode.hpp"
 #include "RegistrarNode.hpp"
-#include "ServiceContainer.hpp"
+#include "SwgChatConfig.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -18,8 +18,8 @@ public:
     void Tick();
 
 private:
+    SwgChatConfig config_;
     bool isRunning_ = true;
     std::unique_ptr<GatewayNode> gatewayNode_;
-    std::unique_ptr<RegistrarNode> registrarNode_;
-    std::unique_ptr<ServiceContainer> services_;
+    std::unique_ptr<RegistrarNode> registrarNode_;    
 };
