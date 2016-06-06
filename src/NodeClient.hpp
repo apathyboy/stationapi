@@ -22,7 +22,7 @@ public:
     }
 
     template <typename T>
-    void SendMessage(T& message) {
+    void SendMessage(const T& message) {
         BinarySinkStream ostream{buffer_.data(), buffer_.size()};
         write(ostream, message);
 
