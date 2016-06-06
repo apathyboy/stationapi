@@ -1,6 +1,7 @@
 include_directories(
     ${PROJECT_SOURCE_DIR}/udplibrary
-    ${Boost_INCLUDE_DIRS})
+    ${Boost_INCLUDE_DIRS}
+    ${SQLite3_INCLUDE_DIR})
 
 add_executable(swgchat
     BinaryStream.hpp
@@ -32,7 +33,8 @@ add_executable(swgchat
     SwgChatConfig.hpp)
 
 target_link_libraries(swgchat
-    udplibrary)
+    udplibrary
+    ${SQLite3_LIBRARY})
 
 if(WIN32)
     target_link_libraries(swgchat ws2_32)
