@@ -23,8 +23,8 @@ ChatAvatar* ChatAvatarService::GetOnlineAvatarByNameAndAddress(
     const std::wstring& name, const std::wstring& address) {
     ChatAvatar* avatar = nullptr;
 
-    auto find_iter = avatarMap_.find(name + L"+" + address);
-    if (find_iter != std::end(avatarMap_)) {
+    auto find_iter = onlineAvatars_.find(name + L"+" + address);
+    if (find_iter != std::end(onlineAvatars_)) {
         avatar = find_iter->second.get();
     }
 
