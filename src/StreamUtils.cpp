@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream& os, const BinaryData& bd) {
 void logNetworkMessage(
     UdpConnection* connection, std::string message, const unsigned char* data, int length) {
     char hold[256];
-    std::cout << message << connection->GetDestinationIp().GetAddress(hold) << ":"
+    std::cout << message << " " << connection->GetDestinationIp().GetAddress(hold) << ":"
               << connection->GetDestinationPort() << " length: " << length << "\n";
 
     std::cout << BinaryData{data, length} << "\n";

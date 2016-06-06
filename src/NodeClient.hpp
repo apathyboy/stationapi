@@ -27,7 +27,7 @@ public:
         write(ostream, message);
 
         auto length = static_cast<int>(boost::iostreams::seek(ostream, 0, std::ios_base::cur));
-        logNetworkMessage(connection_, "Registrar Message To", reinterpret_cast<unsigned char*>(buffer_.data()), length);
+        logNetworkMessage(connection_, "Message To ->", reinterpret_cast<unsigned char*>(buffer_.data()), length);
         connection_->Send(cUdpChannelReliable1, buffer_.data(), length);
     }
 
@@ -37,7 +37,7 @@ public:
 
 private:
     void OnRoutePacket(UdpConnection* connection, const uchar* data, int length) override {
-        logNetworkMessage(connection, "Registrar Message From", data, length);
+        logNetworkMessage(connection, "Message From <-", data, length);
 
         BinarySourceStream istream{ reinterpret_cast<const char*>(data), length };        
         OnIncoming(istream);
