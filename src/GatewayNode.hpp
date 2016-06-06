@@ -8,6 +8,7 @@
 
 class ChatAvatarService;
 struct SwgChatConfig;
+struct sqlite3;
 
 class GatewayNode : public Node<GatewayNode, GatewayClient> {
 public:
@@ -22,4 +23,5 @@ private:
 
     std::unique_ptr<ChatAvatarService> avatarService_;
     SwgChatConfig& config_;
+    sqlite3* db_;
 };

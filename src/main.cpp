@@ -5,7 +5,7 @@
 #include <thread>
 
 int main() {
-    SwgChatApp app{{"192.168.0.10", 5001, "192.168.0.10", 5000}};
+    SwgChatApp app{{"192.168.0.10", 5001, "192.168.0.10", 5000, "chat.db"}};
 
     while (app.IsRunning()) {
         app.Tick();

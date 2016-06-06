@@ -1,7 +1,8 @@
 #include "ChatAvatarService.hpp"
 #include "ChatAvatar.hpp"
 
-ChatAvatarService::ChatAvatarService() {}
+ChatAvatarService::ChatAvatarService(sqlite3* db)
+    : db_{db} {}
 
 ChatAvatarService::~ChatAvatarService() {}
 
@@ -30,5 +31,6 @@ ChatAvatar* ChatAvatarService::GetOnlineAvatarByNameAndAddress(
 
 ChatAvatar* ChatAvatarService::GetPersistedAvatarByNameAndAddress(
     const std::wstring& name, const std::wstring& address) {
-    return nullptr;
+    ChatAvatar* avatar = nullptr;
+    return avatar;
 }
