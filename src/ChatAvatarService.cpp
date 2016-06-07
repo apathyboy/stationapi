@@ -11,67 +11,134 @@ ChatAvatarService::ChatAvatarService(sqlite3* db)
 
 ChatAvatarService::~ChatAvatarService() {}
 
-boost::optional<ChatAvatar> ChatAvatarService::GetAvatarByNameAndAddress(
+std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetAvatar(
     const std::wstring& name, const std::wstring& address) {
-    auto avatar = GetOnlineAvatarByNameAndAddress(name, address);
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    boost::optional<ChatAvatar> avatar;
 
-    if (!avatar) {
-        avatar = GetPersistedAvatarByNameAndAddress(name, address);
+    std::tie(result, avatar) = GetOnlineAvatar(name, address);
+
+    if (result != ChatResultCode::SUCCESS) {
+        std::tie(result, avatar) = GetPersistedAvatar(name, address);
     }
 
-    return avatar;
+    return std::make_pair(result, avatar);
 }
 
-boost::optional<ChatAvatar> ChatAvatarService::GetOnlineAvatarByNameAndAddress(
+bool ChatAvatarService::IsAvatarOnline(const std::wstring& name, const std::wstring& address) {
+    return onlineAvatars_.find(name + L"+" + address) != std::end(onlineAvatars_);
+}
+
+std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetOnlineAvatar(
     const std::wstring& name, const std::wstring& address) {
+    ChatResultCode result = ChatResultCode::SUCCESS;
     boost::optional<ChatAvatar> avatar;
 
     auto find_iter = onlineAvatars_.find(name + L"+" + address);
     if (find_iter != std::end(onlineAvatars_)) {
         avatar = find_iter->second;
+    } else {
+        result = ChatResultCode::DESTAVATARDOESNTEXIST;
     }
 
-    return avatar;
+    return std::make_pair(result, avatar);
 }
 
-boost::optional<ChatAvatar> ChatAvatarService::GetPersistedAvatarByNameAndAddress(
+std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetPersistedAvatar(
     const std::wstring& name, const std::wstring& address) {
+    ChatResultCode result = ChatResultCode::SUCCESS;
     boost::optional<ChatAvatar> avatar;
-    sqlite3_stmt* res;
+    sqlite3_stmt* stmt;
 
-    char* sql = "SELECT id, user_id, name, address, attributes FROM avatar WHERE name = @name AND address = @address";
-    auto rc = sqlite3_prepare_v2(db_, sql, -1, &res, 0);
+    char sql[] = "SELECT id, user_id, name, address, attributes FROM avatar WHERE name = @name AND "
+                "address = @address";
 
-    if (rc != SQLITE_OK) {
-        throw std::runtime_error("Error preparing statement");
+    if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
+        result = ChatResultCode::DBFAIL;
+    } else {
+        std::string nameStr = FromWideString(name);
+        std::string addressStr = FromWideString(address);
+
+        int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
+        int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
+
+        sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
+        sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
+
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            avatar = ChatAvatar{};
+            avatar->avatarId = sqlite3_column_int(stmt, 0);
+            avatar->userId = sqlite3_column_int(stmt, 1);
+
+            auto tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)));
+            avatar->name = std::wstring{std::begin(tmp), std::end(tmp)};
+
+            tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)));
+            avatar->address = std::wstring(std::begin(tmp), std::end(tmp));
+
+            avatar->attributes = sqlite3_column_int(stmt, 4);
+        } else {
+            result = ChatResultCode::DESTAVATARDOESNTEXIST;
+        }
     }
 
-    std::string nameStr = FromWideString(name);
-    std::string addressStr = FromWideString(address);
+    sqlite3_finalize(stmt);
 
-    int nameIdx = sqlite3_bind_parameter_index(res, "@name");
-    int addressIdx = sqlite3_bind_parameter_index(res, "@address");
+    return std::make_pair(result, avatar);
+}
 
-    sqlite3_bind_text(res, nameIdx, nameStr.c_str(), -1, 0);
-    sqlite3_bind_text(res, addressIdx, addressStr.c_str(), -1, 0);
+ChatResultCode ChatAvatarService::PersistNewAvatar(ChatAvatar& avatar) {
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    sqlite3_stmt* stmt;
 
-    int step = sqlite3_step(res);
+    char sql[] = "INSERT INTO avatar (user_id, name, address, attributes) VALUES (@user_id, @name, "
+                "@address, @attributes)";
 
-    if (step == SQLITE_ROW) {
-        avatar = ChatAvatar{};
-        avatar->avatarId = sqlite3_column_int(res, 0);
-        avatar->userId = sqlite3_column_int(res, 1);
+    if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
+        result = ChatResultCode::DBFAIL;
+    } else {
+        std::string nameStr = FromWideString(avatar.name);
+        std::string addressStr = FromWideString(avatar.address);
 
-        auto tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(res, 2)));
-        avatar->name = std::wstring{std::begin(tmp), std::end(tmp)};
+        int userIdIdx = sqlite3_bind_parameter_index(stmt, "@user_id");
+        int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
+        int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
+        int attributesIdx = sqlite3_bind_parameter_index(stmt, "@attributes");
 
-        tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(res, 3)));
-        avatar->address = std::wstring(std::begin(tmp), std::end(tmp));
+        sqlite3_bind_int(stmt, userIdIdx, avatar.userId);
+        sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
+        sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
+        sqlite3_bind_int(stmt, attributesIdx, avatar.attributes);
 
-        avatar->attributes = sqlite3_column_int(res, 4);
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
+            result = ChatResultCode::DBFAIL;
+        } else {
+            avatar.avatarId = static_cast<uint32_t>(sqlite3_last_insert_rowid(db_));
+        }
     }
 
-    sqlite3_finalize(res);
+    return result;
+}
 
-    return avatar;
+std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::CreateAvatar(
+    const std::wstring& name, const std::wstring& address, uint32_t userId,
+    uint32_t loginAttributes, const std::wstring& loginLocation) {
+    ChatAvatar avatar{name, address, userId, loginAttributes, loginLocation};
+
+    auto result = PersistNewAvatar(avatar);
+
+    return std::make_pair(result, avatar);
+}
+
+ChatResultCode ChatAvatarService::LoginAvatar(ChatAvatar& avatar) {
+    ChatResultCode result = ChatResultCode::SUCCESS;
+
+    if (!IsAvatarOnline(avatar.name, avatar.address)) {
+        avatar.isOnline = true;
+        onlineAvatars_.insert(std::make_pair(avatar.name + L"+" + avatar.address, avatar));
+    } else {
+        result = ChatResultCode::DUPLICATELOGIN;
+    }
+
+    return result;
 }

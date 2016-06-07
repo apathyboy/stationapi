@@ -2,6 +2,7 @@
 #pragma once
 
 #include "ChatAvatar.hpp"
+#include "ChatEnums.hpp"
 
 #include <boost/optional.hpp>
 
@@ -15,12 +16,26 @@ public:
     explicit ChatAvatarService(sqlite3* db);
     ~ChatAvatarService();
 
-    boost::optional<ChatAvatar> GetAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
+    std::pair<ChatResultCode, boost::optional<ChatAvatar>> GetAvatar(
+        const std::wstring& name, const std::wstring& address);
+
+    bool IsAvatarOnline(const std::wstring& name, const std::wstring& address);
+
+    std::pair<ChatResultCode, boost::optional<ChatAvatar>> GetOnlineAvatar(
+        const std::wstring& name, const std::wstring& address);
+
+    std::pair<ChatResultCode, boost::optional<ChatAvatar>> GetPersistedAvatar(
+        const std::wstring& name, const std::wstring& address);
+
+    ChatResultCode PersistNewAvatar(ChatAvatar& avatar);
+
+    std::pair<ChatResultCode, boost::optional<ChatAvatar>> CreateAvatar(const std::wstring& name,
+        const std::wstring& address, uint32_t userId, uint32_t loginAttributes,
+        const std::wstring& loginLocation);
+
+    ChatResultCode LoginAvatar(ChatAvatar& avatar);
 
 private:
-    boost::optional<ChatAvatar> GetOnlineAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
-    boost::optional<ChatAvatar> GetPersistedAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
-
     std::unordered_map<std::wstring, ChatAvatar> onlineAvatars_;
     sqlite3* db_;
 };

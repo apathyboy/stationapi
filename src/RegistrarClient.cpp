@@ -19,18 +19,15 @@ void RegistrarClient::OnIncoming(BinarySourceStream& istream) {
 
     switch (request_type) {
     case ChatRequestType::REGISTRAR_GETCHATSERVER:
-        HandleGetChatServer(istream);
+        HandleGetChatServer(read<ReqRegistrarGetChatServer>(istream));
         break;
     default:
         break;
     }
 }
 
-void RegistrarClient::HandleGetChatServer(BinarySourceStream& istream) {
+void RegistrarClient::HandleGetChatServer(const ReqRegistrarGetChatServer& request) {
     auto& config = node_->GetConfig();
-
-    ReqRegistrarGetChatServer request;
-    read(istream, request);
 
     ResRegistrarGetChatServer response{request.track, ChatResultCode::SUCCESS,
         ToWideString(config.gatewayAddress), config.gatewayPort};

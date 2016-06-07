@@ -13,6 +13,15 @@ enum class AvatarAttribute : uint32_t {
 };
 
 struct ChatAvatar {
+    ChatAvatar() = default;
+    ChatAvatar(const std::wstring& name_, const std::wstring& address_, uint32_t userId_,
+        uint32_t attributes_, const std::wstring& loginLocation_)
+        : userId{userId_}
+        , name{name_}
+        , address{address_}
+        , attributes{attributes_}
+        , loginLocation{loginLocation_} {}
+
     uint32_t avatarId = 0;
     uint32_t userId = 0;
     std::wstring name = L"";
