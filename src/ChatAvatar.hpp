@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "Serialization.hpp"
+
 #include <cstdint>
 #include <string>
 
