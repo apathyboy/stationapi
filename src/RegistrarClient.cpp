@@ -19,7 +19,7 @@ void RegistrarClient::OnIncoming(BinarySourceStream& istream) {
 
     switch (request_type) {
     case ChatRequestType::REGISTRAR_GETCHATSERVER:
-        HandleGetChatServer(read<ReqRegistrarGetChatServer>(istream));
+        HandleGetChatServer(::read<ReqRegistrarGetChatServer>(istream));
         break;
     default:
         break;
