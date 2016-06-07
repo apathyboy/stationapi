@@ -1,11 +1,13 @@
 
 #pragma once
 
-#include <memory>
+#include "ChatAvatar.hpp"
+
+#include <boost/optional.hpp>
+
 #include <string>
 #include <unordered_map>
 
-struct ChatAvatar;
 struct sqlite3;
 
 class ChatAvatarService {
@@ -13,11 +15,12 @@ public:
     explicit ChatAvatarService(sqlite3* db);
     ~ChatAvatarService();
 
-    ChatAvatar* GetAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
-    ChatAvatar* GetOnlineAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
-    ChatAvatar* GetPersistedAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
+    boost::optional<ChatAvatar> GetAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
 
 private:
-    std::unordered_map<std::wstring, std::unique_ptr<ChatAvatar>> onlineAvatars_;
+    boost::optional<ChatAvatar> GetOnlineAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
+    boost::optional<ChatAvatar> GetPersistedAvatarByNameAndAddress(const std::wstring& name, const std::wstring& address);
+
+    std::unordered_map<std::wstring, ChatAvatar> onlineAvatars_;
     sqlite3* db_;
 };

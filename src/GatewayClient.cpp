@@ -20,6 +20,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     ChatRequestType request_type = ::read<ChatRequestType>(istream);
 
     switch (request_type) {
+    case ChatRequestType::LOGINAVATAR:
+        HandleLoginAvatar(istream);
+        break;
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(istream);
         break;
@@ -27,6 +30,13 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
         HandleGetAnyAvatar(istream);
         break;
     }
+}
+
+void GatewayClient::HandleLoginAvatar(BinarySourceStream & istream) {
+    ReqLoginAvatar request;
+    read(istream, request);
+
+    auto avatar = node_->GetAvatarService()->GetAvatarByNameAndAddress(request.name, request.address);
 }
 
 void GatewayClient::HandleSetApiVersion(BinarySourceStream& istream) {
@@ -49,7 +59,7 @@ void GatewayClient::HandleGetAnyAvatar(BinarySourceStream& istream) {
         = node_->GetAvatarService()->GetAvatarByNameAndAddress(request.name, request.address);
     ChatResultCode result
         = (avatar) ? ChatResultCode::SUCCESS : ChatResultCode::DESTAVATARDOESNTEXIST;
-    bool isOnline = (avatar != nullptr) ? avatar->isOnline : false;
+    bool isOnline = (avatar) ? avatar->isOnline : false;
 
     SendMessage(ResGetAnyAvatar{request.track, result, isOnline, avatar});
 }

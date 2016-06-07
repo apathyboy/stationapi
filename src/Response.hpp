@@ -4,6 +4,8 @@
 #include "ChatAvatar.hpp"
 #include "Serialization.hpp"
 
+#include <boost/optional.hpp>
+
 #include <cstdint>
 #include <string>
 
@@ -187,7 +189,7 @@ void write(StreamT& ar, const ResSetApiVersion& data) {
 /** Begin GETANYAVATAR */
 
 struct ResGetAnyAvatar {
-    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_, ChatAvatar* avatar_)
+    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_, boost::optional<ChatAvatar> avatar_)
         : track{track_}
         , result{result_}
         , isOnline{isOnline_}
@@ -197,18 +199,18 @@ struct ResGetAnyAvatar {
     uint32_t track;
     ChatResultCode result;
     bool isOnline;
-    ChatAvatar* avatar;
+    boost::optional<ChatAvatar> avatar;
 };
 
 template <typename StreamT>
 void write(StreamT& ar, const ResGetAnyAvatar& data) {
-    write(ar, static_cast<uint32_t>(data.type));
+    write(ar, data.type);
     write(ar, data.track);
-    write(ar, static_cast<uint32_t>(data.result));
+    write(ar, data.result);
     write(ar, data.isOnline);
 
     if (data.result == ChatResultCode::SUCCESS) {
-        write(ar, *data.avatar);
+        write(ar, data.avatar.get());
     }
 }
 

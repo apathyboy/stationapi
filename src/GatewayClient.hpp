@@ -14,6 +14,7 @@ public:
 private:
     void OnIncoming(BinarySourceStream& istream) override;
 
+    void HandleLoginAvatar(BinarySourceStream& istream);
     void HandleSetApiVersion(BinarySourceStream& istream);
     void HandleGetAnyAvatar(BinarySourceStream& istream);
     
