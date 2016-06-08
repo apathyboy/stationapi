@@ -92,7 +92,7 @@ enum class ChatResponseType : uint16_t {
 /** Begin LOGINAVATAR */
 
 struct ResLoginAvatar {
-    ResLoginAvatar(uint32_t track_, ChatResultCode result_, ChatAvatar* avatar_)
+    ResLoginAvatar(uint32_t track_, ChatResultCode result_, boost::optional<ChatAvatar>& avatar_)
         : track{track_}
         , result{result_}
         , avatar{avatar_} {}
@@ -100,7 +100,7 @@ struct ResLoginAvatar {
     const ChatResponseType type = ChatResponseType::LOGINAVATAR;
     uint32_t track;
     ChatResultCode result;
-    ChatAvatar* avatar;
+    const boost::optional<ChatAvatar>& avatar;
 };
 
 template <typename StreamT>
@@ -110,7 +110,7 @@ void write(StreamT& ar, const ResLoginAvatar& data) {
     write(ar, data.result);
 
     if (data.result == ChatResultCode::SUCCESS) {
-        write(ar, *data.avatar);
+        write(ar, data.avatar.get());
     }
 }
 
@@ -139,7 +139,7 @@ void write(StreamT& ar, const ResSetApiVersion& data) {
 /** Begin GETANYAVATAR */
 
 struct ResGetAnyAvatar {
-    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_, ChatAvatar* avatar_)
+    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_, boost::optional<ChatAvatar>& avatar_)
         : track{track_}
         , result{result_}
         , isOnline{isOnline_}
@@ -149,7 +149,7 @@ struct ResGetAnyAvatar {
     uint32_t track;
     ChatResultCode result;
     bool isOnline;
-    ChatAvatar* avatar;
+    boost::optional<ChatAvatar>& avatar;
 };
 
 template <typename StreamT>
@@ -160,7 +160,7 @@ void write(StreamT& ar, const ResGetAnyAvatar& data) {
     write(ar, data.isOnline);
 
     if (data.result == ChatResultCode::SUCCESS) {
-        write(ar, *data.avatar);
+        write(ar, data.avatar.get());
     }
 }
 

@@ -56,7 +56,7 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
         }
     }
 
-    SendMessage(ResLoginAvatar{request.track, result, &(avatar.get())});
+    SendMessage(ResLoginAvatar{request.track, result, avatar});
 }
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
@@ -77,5 +77,5 @@ void GatewayClient::HandleGetAnyAvatar(const ReqGetAnyAvatar& request) {
     std::tie(result, avatar) = avatarService->GetAvatar(request.name, request.address);
     bool isOnline = (avatar) ? avatar->isOnline : false;
 
-    SendMessage(ResGetAnyAvatar{request.track, result, isOnline, &avatar.get()});
+    SendMessage(ResGetAnyAvatar{request.track, result, isOnline, avatar});
 }
