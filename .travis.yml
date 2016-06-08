@@ -1,0 +1,19 @@
+language: cpp
+compiler:
+  - gcc
+#  - clang
+script:
+  - mkdir build
+  - cd build
+  - cmake .. && make
+
+# need to install the Boost libraries to the sandbox
+before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install libboost-dev libsqlite3-dev
+
+notifications:
+  email:
+    recipients: builds@eb2.co
+    on_success: change
+    on_failure: always
