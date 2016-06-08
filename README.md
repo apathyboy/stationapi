@@ -6,6 +6,14 @@ An open implementation of the chat gateway that SOE based games used to provide 
 
 Uses the SOE libraries to implement chat features in a standalone utility. Ideally, the completed implementation would allow for multiple galaxies to connect and allow players to communicate across them.
 
+## External Dependencies ##
+
+c++14 compatible compiler
+boost::iostreams (header only)
+boost::optional (header only)
+sqlite3
+udplibrary - bundled in the Star Wars Galaxies official source
+
 ## Database Initialization ##
 
 Create the database with the following commands:
@@ -14,3 +22,11 @@ Create the database with the following commands:
     sqlite> .read /path/to/init_database.sql
 
 Then update the **chatDatabasePath** config option with the full path to the database.
+
+## Building ##
+
+Copy the udplibrary directory from the Star Wars Galaxies offical source to the top level swgchat directory, then run the following:
+
+    mkdir build; cd build
+    cmake ..
+    cmake --build .
