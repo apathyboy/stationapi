@@ -108,6 +108,22 @@ void read(StreamT& ar, ReqLoginAvatar& data) {
     read(ar, data.loginAttributes);
 }
 
+/** Begin GETROOMSUMMARIES */
+
+struct ReqGetRoomSummaries {
+    const ChatRequestType type = ChatRequestType::GETROOMSUMMARIES;
+    uint32_t track;
+    std::wstring startNodeAddress;
+    std::wstring roomFilter;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqGetRoomSummaries& data) {
+    read(ar, data.track);
+    read(ar, data.startNodeAddress);
+    read(ar, data.roomFilter);
+}
+
 /** Begin SETAPIVERSION */
 
 struct ReqSetApiVersion {

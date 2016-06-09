@@ -9,6 +9,9 @@ add_executable(swgchat
     ChatAvatarService.cpp
     ChatAvatarService.hpp
     ChatEnums.hpp
+    ChatRoom.hpp
+    ChatRoomService.cpp
+    ChatRoomService.hpp
     GatewayClient.cpp
     GatewayClient.hpp
     GatewayNode.cpp

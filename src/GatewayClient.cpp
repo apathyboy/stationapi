@@ -2,6 +2,7 @@
 #include "GatewayClient.hpp"
 
 #include "ChatAvatarService.hpp"
+#include "ChatRoomService.hpp"
 #include "GatewayNode.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -25,6 +26,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
         break;
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
+        break;
+    case ChatRequestType::GETROOMSUMMARIES:
+        HandleGetRoomSummaries(::read<ReqGetRoomSummaries>(istream));
         break;
     case ChatRequestType::GETANYAVATAR:
         HandleGetAnyAvatar(::read<ReqGetAnyAvatar>(istream));
@@ -57,6 +61,14 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
     }
 
     SendMessage(ResLoginAvatar{request.track, result, avatar});
+}
+
+void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries & request) {
+    auto roomService = node_->GetRoomService();
+
+    auto rooms = roomService->GetRoomSummaries(request.startNodeAddress, request.roomFilter);
+
+    SendMessage(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
 }
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {

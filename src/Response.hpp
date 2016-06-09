@@ -3,6 +3,7 @@
 
 #include "ChatAvatar.hpp"
 #include "ChatEnums.hpp"
+#include "ChatRoom.hpp"
 #include "Serialization.hpp"
 
 #include <boost/optional.hpp>
@@ -111,6 +112,37 @@ void write(StreamT& ar, const ResLoginAvatar& data) {
 
     if (data.result == ChatResultCode::SUCCESS) {
         write(ar, data.avatar.get());
+    }
+}
+
+/** Begin GETROOMSUMMARIES */
+
+struct ResGetRoomSummaries {
+    ResGetRoomSummaries(uint32_t track_, ChatResultCode result_, std::vector<ChatRoom*> rooms_)
+        : track{track_}
+        , result{result_}
+        , rooms{rooms_} {}
+
+    const uint16_t type = static_cast<uint16_t>(ChatResponseType::GETROOMSUMMARIES);
+    uint32_t track;
+    ChatResultCode result;
+    std::vector<ChatRoom*> rooms;
+};
+
+
+template <typename StreamT>
+void write(StreamT& ar, const ResGetRoomSummaries& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    write(ar, static_cast<uint32_t>(data.rooms.size()));
+    for (auto room : data.rooms) {
+        write(ar, room->GetRoomAddress());
+        write(ar, room->GetRoomTopic());
+        write(ar, room->GetRoomAttributes());
+        write(ar, room->GetCurrentRoomSize());
+        write(ar, room->GetMaxRoomSize());
     }
 }
 
