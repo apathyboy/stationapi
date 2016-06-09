@@ -119,6 +119,7 @@ struct ReqCreateRoom {
     std::wstring roomPassword;
     uint32_t roomAttributes;
     uint32_t roomMaxSize;
+    std::wstring roomAddress;
     std::wstring srcAddress;
 };
 
@@ -131,6 +132,7 @@ void read(StreamT& ar, ReqCreateRoom& data) {
     read(ar, data.roomPassword);
     read(ar, data.roomAttributes);
     read(ar, data.roomMaxSize);
+    read(ar, data.roomAddress);
     read(ar, data.srcAddress);
 }
 

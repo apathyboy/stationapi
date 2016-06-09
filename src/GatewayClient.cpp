@@ -77,7 +77,7 @@ void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
     if (avatar) {
         std::tie(result, room) = rs->CreateRoom(avatar->avatarId, avatar->name, avatar->address,
             request.roomName, request.roomTopic, request.roomPassword, request.roomAttributes,
-            request.roomMaxSize, request.srcAddress + L"+" + request.roomName, request.srcAddress);
+            request.roomMaxSize, request.roomAddress, request.srcAddress);
     }
 
     SendMessage(ResCreateRoom{request.track, result, room});

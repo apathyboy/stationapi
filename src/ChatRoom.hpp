@@ -19,7 +19,7 @@ public:
         , roomName_{roomName}
         , roomTopic_{roomTopic}
         , roomPassword_{roomPassword}
-        , roomAddress_{roomAddress}
+        , roomAddress_{roomAddress+L"+"+roomName}
         , creatorId_{creatorId}
         , roomAttributes_{roomAttributes}
         , maxRoomSize_{maxRoomSize}

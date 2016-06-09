@@ -1,4 +1,4 @@
-# SWGChat [![Build Status](https://travis-ci.com/apathyboy/swgchat.svg?token=FbjsTwsn9ctKssvZJqCa&branch=master)](https://travis-ci.com/apathyboy/swgchat) #
+# swgchat [![Build Status](https://travis-ci.com/apathyboy/swgchat.svg?token=FbjsTwsn9ctKssvZJqCa&branch=master)](https://travis-ci.com/apathyboy/swgchat) #
 
 An open implementation of the chat gateway that SOE based games used to provide various social communication features such as mail, custom chat rooms, friend management, etc.
 
