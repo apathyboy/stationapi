@@ -19,6 +19,8 @@ public:
     std::pair<ChatResultCode, boost::optional<ChatAvatar>> GetAvatar(
         const std::wstring& name, const std::wstring& address);
 
+    ChatAvatar* GetOnlineAvatar(uint32_t avatarId);
+
     bool IsAvatarOnline(const std::wstring& name, const std::wstring& address);
 
     std::pair<ChatResultCode, boost::optional<ChatAvatar>> GetOnlineAvatar(

@@ -19,13 +19,19 @@ public:
 
     void LoadRoomsFromStorage();
 
-    std::pair<ChatResultCode, ChatRoom*> CreateRoom(const std::wstring& roomName,
-        const std::wstring& roomTopic, const std::wstring& roomPassword, uint32_t roomAttributes,
-        uint32_t maxRoomSize, const std::wstring& roomAddress, const std::wstring& srcAddress);
+    std::pair<ChatResultCode, ChatRoom*> CreateRoom(uint32_t creatorId,
+        const std::wstring& creatorName, const std::wstring& creatorAddress,
+        const std::wstring& roomName, const std::wstring& roomTopic,
+        const std::wstring& roomPassword, uint32_t roomAttributes, uint32_t maxRoomSize,
+        const std::wstring& roomAddress, const std::wstring& srcAddress);
 
-    std::vector<ChatRoom*> GetRoomSummaries(const std::wstring& startNode, const std::wstring& filter = L"");
+    ChatResultCode PersistNewRoom(ChatRoom& avatar);
 
-    std::pair<ChatResultCode, ChatRoom*> GetRoom();
+    std::vector<ChatRoom*> GetRoomSummaries(
+        const std::wstring& startNode, const std::wstring& filter = L"");
+
+    bool RoomExists(const std::wstring& roomName, const std::wstring& roomAddress) const;
+    ChatRoom* GetRoom(const std::wstring& roomName, const std::wstring& roomAddress);
 
 private:
     std::vector<ChatRoom> rooms_;

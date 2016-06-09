@@ -1,4 +1,5 @@
 #include "ChatRoomService.hpp"
+#include "StringUtils.hpp"
 
 #include <iostream>
 
@@ -57,16 +58,90 @@ void ChatRoomService::LoadRoomsFromStorage() {
 
         rooms_.emplace_back(std::move(room));
     }
-
-    if (_DEBUG) {
-        std::cout << "Rooms Loaded: " << rooms_.size();
-    }
 }
 
-std::pair<ChatResultCode, ChatRoom*> ChatRoomService::CreateRoom(const std::wstring& roomName,
-    const std::wstring& roomTopic, const std::wstring& roomPassword, uint32_t roomAttributes,
-    uint32_t maxRoomSize, const std::wstring& roomAddress, const std::wstring& srcAddress) {
-    return std::pair<ChatResultCode, ChatRoom*>();
+std::pair<ChatResultCode, ChatRoom*> ChatRoomService::CreateRoom(uint32_t creatorId,
+    const std::wstring& creatorName, const std::wstring& creatorAddress,
+    const std::wstring& roomName, const std::wstring& roomTopic, const std::wstring& roomPassword,
+    uint32_t roomAttributes, uint32_t maxRoomSize, const std::wstring& roomAddress,
+    const std::wstring& srcAddress) {
+    ChatResultCode result;
+    ChatRoom* roomPtr = GetRoom(roomName, roomAddress);
+
+    if (!RoomExists(roomName, roomAddress)) {
+        rooms_.emplace_back(creatorId, creatorName, creatorAddress, roomName, roomTopic, roomPassword, roomAttributes, maxRoomSize, roomAddress, srcAddress);
+        roomPtr = &rooms_.back();
+        PersistNewRoom(*roomPtr);
+    }
+
+    return std::make_pair(result, roomPtr);
+}
+
+ChatResultCode ChatRoomService::PersistNewRoom(ChatRoom& room) {
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    sqlite3_stmt* stmt;
+
+    char sql[] = "INSERT INTO room (creator_id, creator_name, creator_address, room_name, "
+                 "room_topic, room_password, room_prefix, room_address, room_attributes, "
+                 "room_max_size, room_message_id, created_at, node_level) VALUES (@creator_id, "
+                 "@creator_name, @creator_address, @room_name, @room_topic, @room_password, "
+                 "@room_prefix, @room_address, @room_attributes, @room_max_size, @room_message_id, "
+                 "@created_at, @node_level)";
+
+    if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
+        result = ChatResultCode::DBFAIL;
+    } else {
+        int creatorIdIdx = sqlite3_bind_parameter_index(stmt, "@creator_id");
+        int creatorNameIdx = sqlite3_bind_parameter_index(stmt, "@creator_name");
+        int creatorAddressIdx = sqlite3_bind_parameter_index(stmt, "@creator_address");
+        int roomNameIdx = sqlite3_bind_parameter_index(stmt, "@room_name");
+        int roomTopicIdx = sqlite3_bind_parameter_index(stmt, "@room_topic");
+        int roomPasswordIdx = sqlite3_bind_parameter_index(stmt, "@room_password");
+        int roomPrefixIdx = sqlite3_bind_parameter_index(stmt, "@room_prefix");
+        int roomAddressIdx = sqlite3_bind_parameter_index(stmt, "@room_address");
+        int roomAttributesIdx = sqlite3_bind_parameter_index(stmt, "@room_attributes");
+        int roomMaxSizeIdx = sqlite3_bind_parameter_index(stmt, "@room_max_size");
+        int roomMessageIdIdx = sqlite3_bind_parameter_index(stmt, "@room_message_id");
+        int createdAtIdx = sqlite3_bind_parameter_index(stmt, "@created_at");
+        int nodeLevelIdx = sqlite3_bind_parameter_index(stmt, "@node_level");
+
+        sqlite3_bind_int(stmt, creatorIdIdx, room.creatorId_);
+
+        auto creatorName = FromWideString(room.creatorName_);
+        sqlite3_bind_text(stmt, creatorNameIdx, creatorName.c_str(), -1, 0);
+
+        auto creatorAddress = FromWideString(room.creatorAddress_);
+        sqlite3_bind_text(stmt, creatorAddressIdx, creatorAddress.c_str(), -1, 0);
+
+        auto roomName = FromWideString(room.roomName_);
+        sqlite3_bind_text(stmt, roomNameIdx, roomName.c_str(), -1, 0);
+
+        auto roomTopic = FromWideString(room.roomTopic_);
+        sqlite3_bind_text(stmt, roomTopicIdx, roomTopic.c_str(), -1, 0);
+
+        auto roomPassword = FromWideString(room.roomPassword_);
+        sqlite3_bind_text(stmt, roomPasswordIdx, roomPassword.c_str(), -1, 0);
+
+        auto roomPrefix = FromWideString(room.roomPrefix_);
+        sqlite3_bind_text(stmt, roomPrefixIdx, roomPrefix.c_str(), -1, 0);
+
+        auto roomAddress = FromWideString(room.roomAddress_);
+        sqlite3_bind_text(stmt, roomAddressIdx, roomAddress.c_str(), -1, 0);
+
+        sqlite3_bind_int(stmt, roomAttributesIdx, room.roomAttributes_);
+        sqlite3_bind_int(stmt, roomMaxSizeIdx, room.maxRoomSize_);
+        sqlite3_bind_int(stmt, roomMessageIdIdx, room.roomMessageId_);
+        sqlite3_bind_int(stmt, createdAtIdx, room.createTime_);
+        sqlite3_bind_int(stmt, nodeLevelIdx, room.nodeLevel_);
+
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
+            result = ChatResultCode::DBFAIL;
+        } else {
+            room.roomId_ = static_cast<uint32_t>(sqlite3_last_insert_rowid(db_));
+        }
+    }
+
+    return result;
 }
 
 std::vector<ChatRoom*> ChatRoomService::GetRoomSummaries(
@@ -83,6 +158,25 @@ std::vector<ChatRoom*> ChatRoomService::GetRoomSummaries(
     return rooms;
 }
 
-std::pair<ChatResultCode, ChatRoom*> ChatRoomService::GetRoom() {
-    return std::pair<ChatResultCode, ChatRoom*>();
+bool ChatRoomService::RoomExists(const std::wstring& roomName, const std::wstring& roomAddress) const {
+    return std::find_if(std::begin(rooms_), std::end(rooms_), [roomName, roomAddress](auto& room) {
+        return roomName.compare(room.GetRoomName()) == 0
+            && roomAddress.compare(room.GetRoomAddress());
+    }) != std::end(rooms_);
+}
+
+ChatRoom* ChatRoomService::GetRoom(const std::wstring& roomName, const std::wstring& roomAddress) {
+    ChatRoom* room = nullptr;
+
+    auto find_iter
+        = std::find_if(std::begin(rooms_), std::end(rooms_), [roomName, roomAddress](auto& room) {
+              return roomName.compare(room.GetRoomName()) == 0
+                  && roomAddress.compare(room.GetRoomAddress());
+          });
+
+    if (find_iter != std::end(rooms_)) {
+        room = &(*find_iter);
+    }
+
+    return room;
 }

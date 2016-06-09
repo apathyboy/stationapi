@@ -24,6 +24,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::LOGINAVATAR:
         HandleLoginAvatar(::read<ReqLoginAvatar>(istream));
         break;
+    case ChatRequestType::CREATEROOM:
+        HandleCreateRoom(::read<ReqCreateRoom>(istream));
+        break;
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
         break;
@@ -50,8 +53,8 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
         std::tie(result, avatar) = avatarService->GetPersistedAvatar(request.name, request.address);
         if (result != ChatResultCode::SUCCESS) {
             // Otherwise, create a new avatar.
-            std::tie(result, avatar) = avatarService->CreateAvatar(request.name, request.address, request.userId,
-                request.loginAttributes, request.loginLocation);
+            std::tie(result, avatar) = avatarService->CreateAvatar(request.name, request.address,
+                request.userId, request.loginAttributes, request.loginLocation);
         }
 
         // Log in the avatar if it was successfully created or loaded from storage
@@ -63,7 +66,24 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
     SendMessage(ResLoginAvatar{request.track, result, avatar});
 }
 
-void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries & request) {
+void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
+    auto as = node_->GetAvatarService();
+    auto rs = node_->GetRoomService();
+
+    ChatResultCode result;
+    ChatRoom* room;
+
+    auto avatar = as->GetOnlineAvatar(request.creatorId);
+    if (avatar) {
+        std::tie(result, room) = rs->CreateRoom(avatar->avatarId, avatar->name, avatar->address,
+            request.roomName, request.roomTopic, request.roomPassword, request.roomAttributes,
+            request.roomMaxSize, request.srcAddress + L"+" + request.roomName, request.srcAddress);
+    }
+
+    SendMessage(ResCreateRoom{request.track, result, room});
+}
+
+void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
     auto roomService = node_->GetRoomService();
 
     auto rooms = roomService->GetRoomSummaries(request.startNodeAddress, request.roomFilter);

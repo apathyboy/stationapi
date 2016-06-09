@@ -25,6 +25,19 @@ std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetAva
     return std::make_pair(result, avatar);
 }
 
+ChatAvatar* ChatAvatarService::GetOnlineAvatar(
+    uint32_t avatarId) {
+    ChatAvatar* avatar;
+
+    auto find_iter = std::find_if(std::begin(onlineAvatars_), std::end(onlineAvatars_),
+        [avatarId](auto& avatar) { return avatar.second.avatarId == avatarId; });
+    if (find_iter != std::end(onlineAvatars_)) {
+        avatar = &find_iter->second;
+    }
+
+    return avatar;
+}
+
 bool ChatAvatarService::IsAvatarOnline(const std::wstring& name, const std::wstring& address) {
     return onlineAvatars_.find(name + L"+" + address) != std::end(onlineAvatars_);
 }
@@ -51,7 +64,7 @@ std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetPer
     sqlite3_stmt* stmt;
 
     char sql[] = "SELECT id, user_id, name, address, attributes FROM avatar WHERE name = @name AND "
-                "address = @address";
+                 "address = @address";
 
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
         result = ChatResultCode::DBFAIL;
@@ -92,7 +105,7 @@ ChatResultCode ChatAvatarService::PersistNewAvatar(ChatAvatar& avatar) {
     sqlite3_stmt* stmt;
 
     char sql[] = "INSERT INTO avatar (user_id, name, address, attributes) VALUES (@user_id, @name, "
-                "@address, @attributes)";
+                 "@address, @attributes)";
 
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
         result = ChatResultCode::DBFAIL;

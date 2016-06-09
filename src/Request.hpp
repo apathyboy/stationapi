@@ -108,6 +108,32 @@ void read(StreamT& ar, ReqLoginAvatar& data) {
     read(ar, data.loginAttributes);
 }
 
+/** Begin CREATEROOM */
+
+struct ReqCreateRoom {
+    const ChatRequestType type = ChatRequestType::CREATEROOM;
+    uint32_t track;
+    uint32_t creatorId;
+    std::wstring roomName;
+    std::wstring roomTopic;
+    std::wstring roomPassword;
+    uint32_t roomAttributes;
+    uint32_t roomMaxSize;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqCreateRoom& data) {
+    read(ar, data.track);
+    read(ar, data.creatorId);
+    read(ar, data.roomName);
+    read(ar, data.roomTopic);
+    read(ar, data.roomPassword);
+    read(ar, data.roomAttributes);
+    read(ar, data.roomMaxSize);
+    read(ar, data.srcAddress);
+}
+
 /** Begin GETROOMSUMMARIES */
 
 struct ReqGetRoomSummaries {

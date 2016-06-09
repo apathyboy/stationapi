@@ -7,6 +7,7 @@ class GatewayNode;
 class UdpConnection;
 
 struct ReqLoginAvatar;
+struct ReqCreateRoom;
 struct ReqGetRoomSummaries;
 struct ReqSetApiVersion;
 struct ReqGetAnyAvatar;
@@ -20,6 +21,7 @@ private:
     void OnIncoming(BinarySourceStream& istream) override;
 
     void HandleLoginAvatar(const ReqLoginAvatar& request);
+    void HandleCreateRoom(const ReqCreateRoom& request);
     void HandleGetRoomSummaries(const ReqGetRoomSummaries& request);
     void HandleSetApiVersion(const ReqSetApiVersion& request);
     void HandleGetAnyAvatar(const ReqGetAnyAvatar& request);
