@@ -58,6 +58,8 @@ void ChatRoomService::LoadRoomsFromStorage() {
 
         rooms_.emplace_back(std::move(room));
     }
+
+    std::cout << "Rooms loaded: " << rooms_.size() << "\n";
 }
 
 std::pair<ChatResultCode, ChatRoom*> ChatRoomService::CreateRoom(uint32_t creatorId,
@@ -66,9 +68,9 @@ std::pair<ChatResultCode, ChatRoom*> ChatRoomService::CreateRoom(uint32_t creato
     uint32_t roomAttributes, uint32_t maxRoomSize, const std::wstring& roomAddress,
     const std::wstring& srcAddress) {
     ChatResultCode result = ChatResultCode::SUCCESS;
-    ChatRoom* roomPtr = GetRoom(roomName, roomAddress);
+    ChatRoom* roomPtr = GetRoom(roomAddress);
 
-    if (!RoomExists(roomName, roomAddress)) {
+    if (!RoomExists(roomAddress)) {
         rooms_.emplace_back(creatorId, creatorName, creatorAddress, roomName, roomTopic,
             roomPassword, roomAttributes, maxRoomSize, roomAddress, srcAddress);
         roomPtr = &rooms_.back();
@@ -161,22 +163,17 @@ std::vector<ChatRoom*> ChatRoomService::GetRoomSummaries(
     return rooms;
 }
 
-bool ChatRoomService::RoomExists(
-    const std::wstring& roomName, const std::wstring& roomAddress) const {
-    return std::find_if(std::begin(rooms_), std::end(rooms_), [roomName, roomAddress](auto& room) {
-        return roomName.compare(room.GetRoomName()) == 0
-            && roomAddress.compare(room.GetRoomAddress()) == 0;
+bool ChatRoomService::RoomExists(const std::wstring& roomAddress) const {
+    return std::find_if(std::begin(rooms_), std::end(rooms_), [roomAddress](auto& room) {
+        return roomAddress.compare(room.GetRoomAddress()) == 0;
     }) != std::end(rooms_);
 }
 
-ChatRoom* ChatRoomService::GetRoom(const std::wstring& roomName, const std::wstring& roomAddress) {
+ChatRoom* ChatRoomService::GetRoom(const std::wstring& roomAddress) {
     ChatRoom* room = nullptr;
 
-    auto find_iter
-        = std::find_if(std::begin(rooms_), std::end(rooms_), [roomName, roomAddress](auto& room) {
-        return roomName.compare(room.GetRoomName()) == 0
-            && roomAddress.compare(room.GetRoomAddress()) == 0;
-          });
+    auto find_iter = std::find_if(std::begin(rooms_), std::end(rooms_),
+        [roomAddress](auto& room) { return roomAddress.compare(room.GetRoomAddress()) == 0; });
 
     if (find_iter != std::end(rooms_)) {
         room = &(*find_iter);

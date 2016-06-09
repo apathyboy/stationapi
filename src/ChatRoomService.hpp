@@ -30,8 +30,8 @@ public:
     std::vector<ChatRoom*> GetRoomSummaries(
         const std::wstring& startNode, const std::wstring& filter = L"");
 
-    bool RoomExists(const std::wstring& roomName, const std::wstring& roomAddress) const;
-    ChatRoom* GetRoom(const std::wstring& roomName, const std::wstring& roomAddress);
+    bool RoomExists(const std::wstring& roomAddress) const;
+    ChatRoom* GetRoom(const std::wstring& roomAddress);
 
 private:
     std::vector<ChatRoom> rooms_;

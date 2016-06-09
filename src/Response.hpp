@@ -146,6 +146,37 @@ void write(StreamT& ar, const ResCreateRoom& data) {
     }
 }
 
+/** Begin GETROOM */
+
+struct ResGetRoom {
+    ResGetRoom(uint32_t track_, ChatResultCode result_, ChatRoom* room_)
+        : track{track_}
+        , result{result_}
+        , room{room_} {}
+
+    const uint16_t type = static_cast<uint16_t>(ChatResponseType::GETROOM);
+    uint32_t track;
+    ChatResultCode result;
+    ChatRoom* room;
+    std::vector<ChatRoom*> extraRooms;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResGetRoom& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    if (data.result == ChatResultCode::SUCCESS) {
+        write(ar, *data.room);
+
+        write(ar, static_cast<uint32_t>(data.extraRooms.size()));
+        for (auto room : data.extraRooms) {
+            write(ar, *room);
+        }
+    }
+}
+
 /** Begin GETROOMSUMMARIES */
 
 struct ResGetRoomSummaries {

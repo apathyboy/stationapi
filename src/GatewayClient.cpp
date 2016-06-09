@@ -30,6 +30,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
         break;
+    case ChatRequestType::GETROOM:
+        HandleGetRoom(::read<ReqGetRoom>(istream));
+        break;
     case ChatRequestType::GETROOMSUMMARIES:
         HandleGetRoomSummaries(::read<ReqGetRoomSummaries>(istream));
         break;
@@ -81,6 +84,12 @@ void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
     }
 
     SendMessage(ResCreateRoom{request.track, result, room});
+}
+
+void GatewayClient::HandleGetRoom(const ReqGetRoom & request) {
+    auto room = node_->GetRoomService()->GetRoom(request.roomAddress);
+    ChatResultCode result = (room != nullptr) ? ChatResultCode::SUCCESS : ChatResultCode::ADDRESSDOESNTEXIST;
+    SendMessage(ResGetRoom{request.track, result, room});
 }
 
 void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {

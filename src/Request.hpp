@@ -136,6 +136,22 @@ void read(StreamT& ar, ReqCreateRoom& data) {
     read(ar, data.srcAddress);
 }
 
+/** Begin ENTERROOM */
+
+/** Begin GETROOM */
+
+struct ReqGetRoom {
+    const ChatRequestType type = ChatRequestType::GETROOMSUMMARIES;
+    uint32_t track;
+    std::wstring roomAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqGetRoom& data) {
+    read(ar, data.track);
+    read(ar, data.roomAddress);
+}
+
 /** Begin GETROOMSUMMARIES */
 
 struct ReqGetRoomSummaries {
