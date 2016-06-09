@@ -10,7 +10,7 @@
 #include "UdpLibrary.hpp"
 
 GatewayClient::GatewayClient(UdpConnection* connection, GatewayNode* node)
-    : NodeClient<2048>(connection)
+    : NodeClient<8192>(connection)
     , node_{node} {
     connection->SetHandler(this);
 }
@@ -27,14 +27,17 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::CREATEROOM:
         HandleCreateRoom(::read<ReqCreateRoom>(istream));
         break;
-    case ChatRequestType::SETAPIVERSION:
-        HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
+    case ChatRequestType::ENTERROOM:
+        HandleEnterRoom(::read<ReqEnterRoom>(istream));
         break;
     case ChatRequestType::GETROOM:
         HandleGetRoom(::read<ReqGetRoom>(istream));
         break;
     case ChatRequestType::GETROOMSUMMARIES:
         HandleGetRoomSummaries(::read<ReqGetRoomSummaries>(istream));
+        break;
+    case ChatRequestType::SETAPIVERSION:
+        HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
         break;
     case ChatRequestType::GETANYAVATAR:
         HandleGetAnyAvatar(::read<ReqGetAnyAvatar>(istream));
@@ -86,9 +89,31 @@ void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
     SendMessage(ResCreateRoom{request.track, result, room});
 }
 
-void GatewayClient::HandleGetRoom(const ReqGetRoom & request) {
+void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
+    auto as = node_->GetAvatarService();
+    auto rs = node_->GetRoomService();
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    ChatRoom* room{nullptr};
+
+    auto avatar = as->GetOnlineAvatar(request.srcAvatarId);
+    if (!avatar) {
+        result = ChatResultCode::SRCAVATARDOESNTEXIST;
+    } else {
+        room = rs->GetRoom(request.roomAddress);
+        if (!room) {
+            result = ChatResultCode::ADDRESSNOTROOM;
+        } else {
+            result = room->EnterRoom(avatar, request.roomPassword);
+        }
+    }
+
+    SendMessage(ResEnterRoom{request.track, result, room});
+}
+
+void GatewayClient::HandleGetRoom(const ReqGetRoom& request) {
     auto room = node_->GetRoomService()->GetRoom(request.roomAddress);
-    ChatResultCode result = (room != nullptr) ? ChatResultCode::SUCCESS : ChatResultCode::ADDRESSDOESNTEXIST;
+    ChatResultCode result
+        = (room != nullptr) ? ChatResultCode::SUCCESS : ChatResultCode::ADDRESSDOESNTEXIST;
     SendMessage(ResGetRoom{request.track, result, room});
 }
 

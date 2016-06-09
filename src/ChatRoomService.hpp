@@ -18,7 +18,7 @@ public:
     ~ChatRoomService();
 
     void LoadRoomsFromStorage();
-
+    
     std::pair<ChatResultCode, ChatRoom*> CreateRoom(uint32_t creatorId,
         const std::wstring& creatorName, const std::wstring& creatorAddress,
         const std::wstring& roomName, const std::wstring& roomTopic,

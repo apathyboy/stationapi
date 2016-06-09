@@ -138,6 +138,38 @@ void read(StreamT& ar, ReqCreateRoom& data) {
 
 /** Begin ENTERROOM */
 
+struct ReqEnterRoom {
+    const ChatRequestType type = ChatRequestType::ENTERROOM;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring roomAddress;
+    std::wstring roomPassword;
+    bool passiveCreate;
+    std::wstring paramRoomTopic;
+    uint32_t paramRoomAttributes;
+    uint32_t paramRoomMaxSize;
+    bool requestingEntry;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqEnterRoom& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.roomAddress);
+    read(ar, data.roomPassword);
+    read(ar, data.passiveCreate);
+
+    if (data.passiveCreate) {
+        read(ar, data.paramRoomTopic);
+        read(ar, data.paramRoomAttributes);
+        read(ar, data.paramRoomMaxSize);
+    }
+
+    read(ar, data.requestingEntry);
+    read(ar, data.srcAddress);
+}
+
 /** Begin GETROOM */
 
 struct ReqGetRoom {

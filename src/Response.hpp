@@ -123,7 +123,7 @@ struct ResCreateRoom {
         , result{result_}
         , room{room_} {}
 
-    const uint16_t type = static_cast<uint16_t>(ChatResponseType::CREATEROOM);
+    const ChatResponseType type = ChatResponseType::CREATEROOM;
     uint32_t track;
     ChatResultCode result;
     ChatRoom* room;
@@ -146,6 +146,52 @@ void write(StreamT& ar, const ResCreateRoom& data) {
     }
 }
 
+/** Begin ENTERROOM */
+
+struct ResEnterRoom {
+    ResEnterRoom(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    ResEnterRoom(uint32_t track_, ChatResultCode result_, ChatRoom* room_,
+        std::vector<ChatRoom*> extraRooms_ = {})
+        : track{track_}
+        , result{result_}
+        , gotRoomObj{room_ != nullptr}
+        , room{room_}
+        , extraRooms{extraRooms_} {
+        if (gotRoomObj) {
+            roomId = room_->GetRoomId();
+        }
+    }
+
+    const ChatResponseType type = ChatResponseType::ENTERROOM;
+    uint32_t track;
+    ChatResultCode result;
+    uint32_t roomId;
+    bool gotRoomObj = false;
+    ChatRoom* room = nullptr;
+    std::vector<ChatRoom*> extraRooms;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResEnterRoom& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+    write(ar, data.roomId);
+    write(ar, data.gotRoomObj);
+
+    if (data.gotRoomObj) {
+        write(ar, *data.room);
+
+        write(ar, static_cast<uint32_t>(data.extraRooms.size()));
+        for (auto room : data.extraRooms) {
+            write(ar, *room);
+        }
+    }
+}
+
 /** Begin GETROOM */
 
 struct ResGetRoom {
@@ -154,7 +200,7 @@ struct ResGetRoom {
         , result{result_}
         , room{room_} {}
 
-    const uint16_t type = static_cast<uint16_t>(ChatResponseType::GETROOM);
+    const ChatResponseType type = ChatResponseType::GETROOM;
     uint32_t track;
     ChatResultCode result;
     ChatRoom* room;
@@ -185,12 +231,11 @@ struct ResGetRoomSummaries {
         , result{result_}
         , rooms{rooms_} {}
 
-    const uint16_t type = static_cast<uint16_t>(ChatResponseType::GETROOMSUMMARIES);
+    const ChatResponseType type = ChatResponseType::GETROOMSUMMARIES;
     uint32_t track;
     ChatResultCode result;
     std::vector<ChatRoom*> rooms;
 };
-
 
 template <typename StreamT>
 void write(StreamT& ar, const ResGetRoomSummaries& data) {
@@ -233,7 +278,8 @@ void write(StreamT& ar, const ResSetApiVersion& data) {
 /** Begin GETANYAVATAR */
 
 struct ResGetAnyAvatar {
-    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_, boost::optional<ChatAvatar>& avatar_)
+    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_,
+        boost::optional<ChatAvatar>& avatar_)
         : track{track_}
         , result{result_}
         , isOnline{isOnline_}

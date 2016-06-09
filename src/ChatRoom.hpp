@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "ChatEnums.hpp"
+
 #include <string>
 #include <vector>
 
@@ -24,6 +26,9 @@ public:
         , roomAttributes_{roomAttributes}
         , maxRoomSize_{maxRoomSize}
     {}
+    
+    ChatResultCode EnterRoom(ChatAvatar* avatar, const std::wstring& password);
+    bool IsInRoom(ChatAvatar* avatar) const;
 
     uint32_t GetCreatorId() const { return creatorId_; }
     const std::wstring& GetCreatorName() const { return creatorName_; }
