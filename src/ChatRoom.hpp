@@ -12,6 +12,7 @@ public:
     uint32_t GetMaxRoomSize() const { return 0; }
 
 private:
+    friend class ChatRoomService;
     std::wstring creatorName_;
     std::wstring creatorAddress_;
     std::wstring roomName_;

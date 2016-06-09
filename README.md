@@ -14,6 +14,14 @@ boost::optional (header only)
 sqlite3
 udplibrary - bundled in the Star Wars Galaxies official source
 
+## Building ##
+
+Copy the udplibrary directory from the Star Wars Galaxies offical source to the top level swgchat directory, then run the following:
+
+    mkdir build; cd build
+    cmake ..
+    cmake --build .
+
 ## Database Initialization ##
 
 Create the database with the following commands:
@@ -22,11 +30,3 @@ Create the database with the following commands:
     sqlite> .read /path/to/init_database.sql
 
 Then update the **chatDatabasePath** config option with the full path to the database.
-
-## Building ##
-
-Copy the udplibrary directory from the Star Wars Galaxies offical source to the top level swgchat directory, then run the following:
-
-    mkdir build; cd build
-    cmake ..
-    cmake --build .
