@@ -1,1 +1,2 @@
 CREATE TABLE avatar (id INTEGER PRIMARY KEY, user_id INTEGER, name TEXT, address TEXT, attributes INTEGER);
+CREATE TABLE room (id INTEGER PRIMARY KEY, creator_id INTEGER, creator_name TEXT, creator_address TEXT, room_name TEXT, room_topic TEXT, room_password TEXT, room_prefix TEXT, room_address TEXT, room_attributes INTEGER, room_max_size INTEGER, room_message_id INTEGER, created_at INTEGER, node_level INTEGER);
