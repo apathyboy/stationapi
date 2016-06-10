@@ -19,7 +19,7 @@ add_definitions(-DBOOST_ALL_NO_LIB)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 
-find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(SQLite3 REQUIRED)
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -28,3 +28,5 @@ endif ()
 
 add_subdirectory(src)
 add_subdirectory(udplibrary)
+
+configure_file(extras/swgchat.cfg.dist src/swgchat.cfg COPYONLY)

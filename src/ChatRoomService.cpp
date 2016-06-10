@@ -68,9 +68,9 @@ std::pair<ChatResultCode, ChatRoom*> ChatRoomService::CreateRoom(uint32_t creato
     uint32_t roomAttributes, uint32_t maxRoomSize, const std::wstring& roomAddress,
     const std::wstring& srcAddress) {
     ChatResultCode result = ChatResultCode::SUCCESS;
-    ChatRoom* roomPtr = GetRoom(roomAddress);
+    ChatRoom* roomPtr = nullptr;
 
-    if (!RoomExists(roomAddress)) {
+    if (!RoomExists(roomAddress + L"+" + roomName)) {
         rooms_.emplace_back(creatorId, creatorName, creatorAddress, roomName, roomTopic,
             roomPassword, roomAttributes, maxRoomSize, roomAddress, srcAddress);
         roomPtr = &rooms_.back();

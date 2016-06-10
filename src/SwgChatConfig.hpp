@@ -5,6 +5,7 @@
 #include <string>
 
 struct SwgChatConfig {
+    SwgChatConfig() = default;
     SwgChatConfig(const std::string& gatewayAddress_, uint16_t gatewayPort_,
         const std::string& registrarAddress_, uint16_t registrarPort_, const std::string& chatDatabasePath_)
         : gatewayAddress{gatewayAddress_}

@@ -11,6 +11,7 @@ Uses the SOE libraries to implement chat features in a standalone utility. Ideal
 c++14 compatible compiler
 boost::iostreams (header only)
 boost::optional (header only)
+boost::program_options
 sqlite3
 udplibrary - bundled in the Star Wars Galaxies official source
 
@@ -29,4 +30,4 @@ Create the database with the following commands:
     sqlite3 chat.db
     sqlite> .read /path/to/init_database.sql
 
-Then update the **chatDatabasePath** config option with the full path to the database.
+Then update the **database_path** config option with the full path to the database.

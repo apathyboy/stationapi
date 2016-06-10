@@ -37,6 +37,7 @@ add_executable(swgchat
 
 target_link_libraries(swgchat
     udplibrary
+    ${Boost_LIBRARIES}
     ${SQLite3_LIBRARY})
 
 if(WIN32)
