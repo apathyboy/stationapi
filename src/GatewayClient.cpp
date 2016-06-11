@@ -71,7 +71,7 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
         }
     }
 
-    SendMessage(ResLoginAvatar{request.track, result, avatar});
+    Send(ResLoginAvatar{request.track, result, avatar});
 }
 
 void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
@@ -88,7 +88,7 @@ void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
             request.roomMaxSize, request.roomAddress, request.srcAddress);
     }
 
-    SendMessage(ResCreateRoom{request.track, result, room});
+    Send(ResCreateRoom{request.track, result, room});
 }
 
 void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
@@ -109,14 +109,14 @@ void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
         }
     }
 
-    SendMessage(ResEnterRoom{request.track, result, room});
+    Send(ResEnterRoom{request.track, result, room});
 }
 
 void GatewayClient::HandleGetRoom(const ReqGetRoom& request) {
     auto room = node_->GetRoomService()->GetRoom(request.roomAddress);
     ChatResultCode result
         = (room != nullptr) ? ChatResultCode::SUCCESS : ChatResultCode::ADDRESSDOESNTEXIST;
-    SendMessage(ResGetRoom{request.track, result, room});
+    Send(ResGetRoom{request.track, result, room});
 }
 
 void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
@@ -124,7 +124,7 @@ void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
 
     auto rooms = roomService->GetRoomSummaries(request.startNodeAddress, request.roomFilter);
 
-    SendMessage(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
+    Send(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
 }
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
@@ -136,7 +136,7 @@ void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
     node_->GetAvatarService()->ClearOnlineAvatars();
     node_->GetRoomService()->LoadRoomsFromStorage();
 
-    SendMessage(ResSetApiVersion{request.track, result, version});
+    Send(ResSetApiVersion{request.track, result, version});
 }
 
 void GatewayClient::HandleGetAnyAvatar(const ReqGetAnyAvatar& request) {
@@ -148,5 +148,5 @@ void GatewayClient::HandleGetAnyAvatar(const ReqGetAnyAvatar& request) {
     std::tie(result, avatar) = avatarService->GetAvatar(request.name, request.address);
     bool isOnline = (avatar) ? avatar->isOnline : false;
 
-    SendMessage(ResGetAnyAvatar{request.track, result, isOnline, avatar});
+    Send(ResGetAnyAvatar{request.track, result, isOnline, avatar});
 }
