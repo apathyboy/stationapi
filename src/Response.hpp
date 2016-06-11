@@ -3,6 +3,7 @@
 
 #include "ChatAvatar.hpp"
 #include "ChatEnums.hpp"
+#include "ChatRoom.hpp"
 #include "Serialization.hpp"
 
 #include <boost/optional.hpp>
@@ -114,6 +115,144 @@ void write(StreamT& ar, const ResLoginAvatar& data) {
     }
 }
 
+/** Begin CREATEROOM */
+
+struct ResCreateRoom {
+    ResCreateRoom(uint32_t track_, ChatResultCode result_, ChatRoom* room_)
+        : track{track_}
+        , result{result_}
+        , room{room_} {}
+
+    const ChatResponseType type = ChatResponseType::CREATEROOM;
+    uint32_t track;
+    ChatResultCode result;
+    ChatRoom* room;
+    std::vector<ChatRoom*> extraRooms;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResCreateRoom& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    if (data.result == ChatResultCode::SUCCESS) {
+        write(ar, *data.room);
+
+        write(ar, static_cast<uint32_t>(data.extraRooms.size()));
+        for (auto room : data.extraRooms) {
+            write(ar, *room);
+        }
+    }
+}
+
+/** Begin ENTERROOM */
+
+struct ResEnterRoom {
+    ResEnterRoom(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    ResEnterRoom(uint32_t track_, ChatResultCode result_, ChatRoom* room_,
+        std::vector<ChatRoom*> extraRooms_ = {})
+        : track{track_}
+        , result{result_}
+        , gotRoomObj{room_ != nullptr}
+        , room{room_}
+        , extraRooms{extraRooms_} {
+        if (gotRoomObj) {
+            roomId = room_->GetRoomId();
+        }
+    }
+
+    const ChatResponseType type = ChatResponseType::ENTERROOM;
+    uint32_t track;
+    ChatResultCode result;
+    uint32_t roomId;
+    bool gotRoomObj = false;
+    ChatRoom* room = nullptr;
+    std::vector<ChatRoom*> extraRooms;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResEnterRoom& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+    write(ar, data.roomId);
+    write(ar, data.gotRoomObj);
+
+    if (data.gotRoomObj) {
+        write(ar, *data.room);
+
+        write(ar, static_cast<uint32_t>(data.extraRooms.size()));
+        for (auto room : data.extraRooms) {
+            write(ar, *room);
+        }
+    }
+}
+
+/** Begin GETROOM */
+
+struct ResGetRoom {
+    ResGetRoom(uint32_t track_, ChatResultCode result_, ChatRoom* room_)
+        : track{track_}
+        , result{result_}
+        , room{room_} {}
+
+    const ChatResponseType type = ChatResponseType::GETROOM;
+    uint32_t track;
+    ChatResultCode result;
+    ChatRoom* room;
+    std::vector<ChatRoom*> extraRooms;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResGetRoom& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    if (data.result == ChatResultCode::SUCCESS) {
+        write(ar, *data.room);
+
+        write(ar, static_cast<uint32_t>(data.extraRooms.size()));
+        for (auto room : data.extraRooms) {
+            write(ar, *room);
+        }
+    }
+}
+
+/** Begin GETROOMSUMMARIES */
+
+struct ResGetRoomSummaries {
+    ResGetRoomSummaries(uint32_t track_, ChatResultCode result_, std::vector<ChatRoom*> rooms_)
+        : track{track_}
+        , result{result_}
+        , rooms{rooms_} {}
+
+    const ChatResponseType type = ChatResponseType::GETROOMSUMMARIES;
+    uint32_t track;
+    ChatResultCode result;
+    std::vector<ChatRoom*> rooms;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResGetRoomSummaries& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    write(ar, static_cast<uint32_t>(data.rooms.size()));
+    for (auto room : data.rooms) {
+        write(ar, room->GetRoomAddress());
+        write(ar, room->GetRoomTopic());
+        write(ar, room->GetRoomAttributes());
+        write(ar, room->GetCurrentRoomSize());
+        write(ar, room->GetMaxRoomSize());
+    }
+}
+
 /** Begin SETAPIVERSION */
 
 struct ResSetApiVersion {
@@ -139,7 +278,8 @@ void write(StreamT& ar, const ResSetApiVersion& data) {
 /** Begin GETANYAVATAR */
 
 struct ResGetAnyAvatar {
-    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_, boost::optional<ChatAvatar>& avatar_)
+    ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_,
+        boost::optional<ChatAvatar>& avatar_)
         : track{track_}
         , result{result_}
         , isOnline{isOnline_}

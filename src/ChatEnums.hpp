@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 enum class ChatResultCode : uint32_t {
     SUCCESS = 0,
     TIMEOUT = 1,

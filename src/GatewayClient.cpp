@@ -2,6 +2,7 @@
 #include "GatewayClient.hpp"
 
 #include "ChatAvatarService.hpp"
+#include "ChatRoomService.hpp"
 #include "GatewayNode.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -9,7 +10,7 @@
 #include "UdpLibrary.hpp"
 
 GatewayClient::GatewayClient(UdpConnection* connection, GatewayNode* node)
-    : NodeClient<2048>(connection)
+    : NodeClient<8192>(connection)
     , node_{node} {
     connection->SetHandler(this);
 }
@@ -23,11 +24,25 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::LOGINAVATAR:
         HandleLoginAvatar(::read<ReqLoginAvatar>(istream));
         break;
+    case ChatRequestType::CREATEROOM:
+        HandleCreateRoom(::read<ReqCreateRoom>(istream));
+        break;
+    case ChatRequestType::ENTERROOM:
+        HandleEnterRoom(::read<ReqEnterRoom>(istream));
+        break;
+    case ChatRequestType::GETROOM:
+        HandleGetRoom(::read<ReqGetRoom>(istream));
+        break;
+    case ChatRequestType::GETROOMSUMMARIES:
+        HandleGetRoomSummaries(::read<ReqGetRoomSummaries>(istream));
+        break;
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
         break;
     case ChatRequestType::GETANYAVATAR:
         HandleGetAnyAvatar(::read<ReqGetAnyAvatar>(istream));
+        break;
+    default:
         break;
     }
 }
@@ -46,8 +61,8 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
         std::tie(result, avatar) = avatarService->GetPersistedAvatar(request.name, request.address);
         if (result != ChatResultCode::SUCCESS) {
             // Otherwise, create a new avatar.
-            std::tie(result, avatar) = avatarService->CreateAvatar(request.name, request.address, request.userId,
-                request.loginAttributes, request.loginLocation);
+            std::tie(result, avatar) = avatarService->CreateAvatar(request.name, request.address,
+                request.userId, request.loginAttributes, request.loginLocation);
         }
 
         // Log in the avatar if it was successfully created or loaded from storage
@@ -59,11 +74,67 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
     SendMessage(ResLoginAvatar{request.track, result, avatar});
 }
 
+void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
+    auto as = node_->GetAvatarService();
+    auto rs = node_->GetRoomService();
+
+    ChatResultCode result;
+    ChatRoom* room;
+
+    auto avatar = as->GetOnlineAvatar(request.creatorId);
+    if (avatar) {
+        std::tie(result, room) = rs->CreateRoom(avatar->avatarId, avatar->name, avatar->address,
+            request.roomName, request.roomTopic, request.roomPassword, request.roomAttributes,
+            request.roomMaxSize, request.roomAddress, request.srcAddress);
+    }
+
+    SendMessage(ResCreateRoom{request.track, result, room});
+}
+
+void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
+    auto as = node_->GetAvatarService();
+    auto rs = node_->GetRoomService();
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    ChatRoom* room{nullptr};
+
+    auto avatar = as->GetOnlineAvatar(request.srcAvatarId);
+    if (!avatar) {
+        result = ChatResultCode::SRCAVATARDOESNTEXIST;
+    } else {
+        room = rs->GetRoom(request.roomAddress);
+        if (!room) {
+            result = ChatResultCode::ADDRESSNOTROOM;
+        } else {
+            result = room->EnterRoom(avatar, request.roomPassword);
+        }
+    }
+
+    SendMessage(ResEnterRoom{request.track, result, room});
+}
+
+void GatewayClient::HandleGetRoom(const ReqGetRoom& request) {
+    auto room = node_->GetRoomService()->GetRoom(request.roomAddress);
+    ChatResultCode result
+        = (room != nullptr) ? ChatResultCode::SUCCESS : ChatResultCode::ADDRESSDOESNTEXIST;
+    SendMessage(ResGetRoom{request.track, result, room});
+}
+
+void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
+    auto roomService = node_->GetRoomService();
+
+    auto rooms = roomService->GetRoomSummaries(request.startNodeAddress, request.roomFilter);
+
+    SendMessage(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
+}
+
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
     uint32_t version = node_->GetConfig().version;
     ChatResultCode result = (version == request.version)
         ? ChatResultCode::SUCCESS
         : ChatResultCode::WRONGCHATSERVERFORREQUEST;
+
+    node_->GetAvatarService()->ClearOnlineAvatars();
+    node_->GetRoomService()->LoadRoomsFromStorage();
 
     SendMessage(ResSetApiVersion{request.track, result, version});
 }

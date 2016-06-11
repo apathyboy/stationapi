@@ -7,6 +7,7 @@
 #include <memory>
 
 class ChatAvatarService;
+class ChatRoomService;
 struct SwgChatConfig;
 struct sqlite3;
 
@@ -16,12 +17,14 @@ public:
     ~GatewayNode();
 
     ChatAvatarService* GetAvatarService();
+    ChatRoomService* GetRoomService();
     SwgChatConfig& GetConfig();
 
 private:
     void OnTick() override;
 
     std::unique_ptr<ChatAvatarService> avatarService_;
+    std::unique_ptr<ChatRoomService> roomService_;
     SwgChatConfig& config_;
     sqlite3* db_;
 };

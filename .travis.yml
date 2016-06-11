@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 language: cpp
 compiler:
   - gcc
@@ -6,11 +8,6 @@ script:
   - mkdir build
   - cd build
   - cmake .. && make
-
-# need to install the Boost libraries to the sandbox
-before_script:
-  - sudo apt-get update -qq
-  - sudo apt-get install libboost-dev libsqlite3-dev
 
 notifications:
   email:
@@ -27,6 +24,9 @@ addons:
             #- clang-3.7
             - g++-5
             - gcc-5
+            - libboost-dev
+            - libboost-program-options-dev
+            - libsqlite3-dev
 
 install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi

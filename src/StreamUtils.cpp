@@ -2,8 +2,9 @@
 #include "StreamUtils.hpp"
 #include "UdpLibrary.hpp"
 
+#include "easylogging++.h"
+
 #include <iomanip>
-#include <iostream>
 
 std::ostream& operator<<(std::ostream& os, const BinaryData& bd) {
     auto length = bd.length();
@@ -60,8 +61,9 @@ std::ostream& operator<<(std::ostream& os, const BinaryData& bd) {
 void logNetworkMessage(
     UdpConnection* connection, std::string message, const unsigned char* data, int length) {
     char hold[256];
-    std::cout << message << " " << connection->GetDestinationIp().GetAddress(hold) << ":"
-              << connection->GetDestinationPort() << " length: " << length << "\n";
 
-    std::cout << BinaryData{data, length} << "\n";
+    VLOG(1) << "\n"
+            << message << " " << connection->GetDestinationIp().GetAddress(hold) << ":"
+            << connection->GetDestinationPort() << " length: " << length << "\n"
+            << BinaryData{data, length};
 }

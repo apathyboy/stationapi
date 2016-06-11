@@ -108,6 +108,98 @@ void read(StreamT& ar, ReqLoginAvatar& data) {
     read(ar, data.loginAttributes);
 }
 
+/** Begin CREATEROOM */
+
+struct ReqCreateRoom {
+    const ChatRequestType type = ChatRequestType::CREATEROOM;
+    uint32_t track;
+    uint32_t creatorId;
+    std::wstring roomName;
+    std::wstring roomTopic;
+    std::wstring roomPassword;
+    uint32_t roomAttributes;
+    uint32_t roomMaxSize;
+    std::wstring roomAddress;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqCreateRoom& data) {
+    read(ar, data.track);
+    read(ar, data.creatorId);
+    read(ar, data.roomName);
+    read(ar, data.roomTopic);
+    read(ar, data.roomPassword);
+    read(ar, data.roomAttributes);
+    read(ar, data.roomMaxSize);
+    read(ar, data.roomAddress);
+    read(ar, data.srcAddress);
+}
+
+/** Begin ENTERROOM */
+
+struct ReqEnterRoom {
+    const ChatRequestType type = ChatRequestType::ENTERROOM;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring roomAddress;
+    std::wstring roomPassword;
+    bool passiveCreate;
+    std::wstring paramRoomTopic;
+    uint32_t paramRoomAttributes;
+    uint32_t paramRoomMaxSize;
+    bool requestingEntry;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqEnterRoom& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.roomAddress);
+    read(ar, data.roomPassword);
+    read(ar, data.passiveCreate);
+
+    if (data.passiveCreate) {
+        read(ar, data.paramRoomTopic);
+        read(ar, data.paramRoomAttributes);
+        read(ar, data.paramRoomMaxSize);
+    }
+
+    read(ar, data.requestingEntry);
+    read(ar, data.srcAddress);
+}
+
+/** Begin GETROOM */
+
+struct ReqGetRoom {
+    const ChatRequestType type = ChatRequestType::GETROOMSUMMARIES;
+    uint32_t track;
+    std::wstring roomAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqGetRoom& data) {
+    read(ar, data.track);
+    read(ar, data.roomAddress);
+}
+
+/** Begin GETROOMSUMMARIES */
+
+struct ReqGetRoomSummaries {
+    const ChatRequestType type = ChatRequestType::GETROOMSUMMARIES;
+    uint32_t track;
+    std::wstring startNodeAddress;
+    std::wstring roomFilter;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqGetRoomSummaries& data) {
+    read(ar, data.track);
+    read(ar, data.startNodeAddress);
+    read(ar, data.roomFilter);
+}
+
 /** Begin SETAPIVERSION */
 
 struct ReqSetApiVersion {

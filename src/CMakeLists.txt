@@ -1,5 +1,6 @@
 include_directories(
-    ${PROJECT_SOURCE_DIR}/udplibrary
+    ${PROJECT_SOURCE_DIR}/externals/easyloggingpp
+    ${PROJECT_SOURCE_DIR}/externals/udplibrary
     ${Boost_INCLUDE_DIRS}
     ${SQLite3_INCLUDE_DIR})
 
@@ -9,6 +10,10 @@ add_executable(swgchat
     ChatAvatarService.cpp
     ChatAvatarService.hpp
     ChatEnums.hpp
+    ChatRoom.cpp
+    ChatRoom.hpp
+    ChatRoomService.cpp
+    ChatRoomService.hpp
     GatewayClient.cpp
     GatewayClient.hpp
     GatewayNode.cpp
@@ -33,6 +38,7 @@ add_executable(swgchat
 
 target_link_libraries(swgchat
     udplibrary
+    ${Boost_LIBRARIES}
     ${SQLite3_LIBRARY})
 
 if(WIN32)
