@@ -131,6 +131,9 @@ void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
         ? ChatResultCode::SUCCESS
         : ChatResultCode::WRONGCHATSERVERFORREQUEST;
 
+    node_->GetAvatarService()->ClearOnlineAvatars();
+    node_->GetRoomService()->LoadRoomsFromStorage();
+
     SendMessage(ResSetApiVersion{request.track, result, version});
 }
 

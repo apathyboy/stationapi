@@ -11,6 +11,10 @@ ChatAvatarService::ChatAvatarService(sqlite3* db)
 
 ChatAvatarService::~ChatAvatarService() {}
 
+void ChatAvatarService::ClearOnlineAvatars() {
+    onlineAvatars_.clear();
+}
+
 std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetAvatar(
     const std::wstring& name, const std::wstring& address) {
     ChatResultCode result = ChatResultCode::SUCCESS;

@@ -16,6 +16,8 @@ public:
     explicit ChatAvatarService(sqlite3* db);
     ~ChatAvatarService();
 
+    void ClearOnlineAvatars();
+
     std::pair<ChatResultCode, boost::optional<ChatAvatar>> GetAvatar(
         const std::wstring& name, const std::wstring& address);
 

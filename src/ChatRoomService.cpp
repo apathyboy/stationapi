@@ -13,6 +13,8 @@ ChatRoomService::ChatRoomService(sqlite3* db)
 ChatRoomService::~ChatRoomService() {}
 
 void ChatRoomService::LoadRoomsFromStorage() {
+    rooms_.clear();
+
     sqlite3_stmt* stmt;
 
     char sql[] = "SELECT id, creator_id, creator_name, creator_address, room_name, room_topic, "
