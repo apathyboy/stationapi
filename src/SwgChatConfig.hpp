@@ -20,4 +20,5 @@ struct SwgChatConfig {
     std::string registrarAddress;
     uint16_t registrarPort;
     std::string chatDatabasePath;
+    std::string loggerConfig;
 };

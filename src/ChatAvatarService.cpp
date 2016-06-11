@@ -4,8 +4,6 @@
 
 #include <sqlite3.h>
 
-#include <iostream>
-
 ChatAvatarService::ChatAvatarService(sqlite3* db)
     : db_{db} {}
 

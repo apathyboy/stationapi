@@ -42,6 +42,8 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::GETANYAVATAR:
         HandleGetAnyAvatar(::read<ReqGetAnyAvatar>(istream));
         break;
+    default:
+        break;
     }
 }
 

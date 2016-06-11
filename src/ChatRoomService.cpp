@@ -1,14 +1,12 @@
 #include "ChatRoomService.hpp"
 #include "StringUtils.hpp"
 
-#include <iostream>
+#include "easylogging++.h"
 
 #include <sqlite3.h>
 
 ChatRoomService::ChatRoomService(sqlite3* db)
-    : db_{db} {
-    LoadRoomsFromStorage();
-}
+    : db_{db} {}
 
 ChatRoomService::~ChatRoomService() {}
 
@@ -61,7 +59,7 @@ void ChatRoomService::LoadRoomsFromStorage() {
         rooms_.emplace_back(std::move(room));
     }
 
-    std::cout << "Rooms loaded: " << rooms_.size() << "\n";
+    LOG(INFO) << "Rooms loaded: " << rooms_.size();
 }
 
 std::pair<ChatResultCode, ChatRoom*> ChatRoomService::CreateRoom(uint32_t creatorId,

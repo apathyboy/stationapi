@@ -1,4 +1,10 @@
 
+
+#define ELPP_DISABLE_DEFAULT_CRASH_HANDLING 1
+#define ELPP_DEFAULT_LOG_FILE "logs/swgchat.log"
+
+#include "easylogging++.h"
+
 #include "SwgChatApp.hpp"
 
 #include <boost/program_options.hpp>
@@ -8,10 +14,17 @@
 #include <iostream>
 #include <thread>
 
+INITIALIZE_EASYLOGGINGPP
+
 SwgChatConfig BuildConfiguration(int argc, char* argv[]);
 
 int main(int argc, char* argv[]) {
-    SwgChatApp app{BuildConfiguration(argc, argv)};
+    auto config = BuildConfiguration(argc, argv);
+
+    el::Loggers::setDefaultConfigurations(config.loggerConfig, true);
+    START_EASYLOGGINGPP(argc, argv);
+
+    SwgChatApp app{config};
 
     while (app.IsRunning()) {
         app.Tick();
@@ -47,6 +60,8 @@ SwgChatConfig BuildConfiguration(int argc, char* argv[]) {
             "port for registrar connections")
         ("database_path", po::value<std::string>(&config.chatDatabasePath)->default_value("chat.db"),
             "path to the sqlite3 database file")
+        ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("logger.cfg"),
+            "path to the logger configuration")
         ;
 
     po::options_description cmdline_options;
@@ -56,7 +71,7 @@ SwgChatConfig BuildConfiguration(int argc, char* argv[]) {
     config_file_options.add(options);
 
     po::variables_map vm;
-    po::store(po::command_line_parser(argc, argv).options(cmdline_options).run(), vm);
+    po::store(po::command_line_parser(argc, argv).options(cmdline_options).allow_unregistered().run(), vm);
     po::notify(vm);
 
     std::ifstream ifs(configFile.c_str());

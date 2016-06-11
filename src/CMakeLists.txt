@@ -1,5 +1,6 @@
 include_directories(
-    ${PROJECT_SOURCE_DIR}/udplibrary
+    ${PROJECT_SOURCE_DIR}/externals/easyloggingpp
+    ${PROJECT_SOURCE_DIR}/externals/udplibrary
     ${Boost_INCLUDE_DIRS}
     ${SQLite3_INCLUDE_DIR})
 

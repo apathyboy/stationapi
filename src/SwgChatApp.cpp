@@ -1,14 +1,14 @@
 #include "SwgChatApp.hpp"
 
-#include <iostream>
+#include "easylogging++.h"
 
 SwgChatApp::SwgChatApp(SwgChatConfig config) 
     : config_{std::move(config)} {
     registrarNode_ = std::make_unique<RegistrarNode>(config_);
-    std::cout << "Registrar listening @" << config_.registrarAddress << ":" << config_.registrarPort << "\n";
+    LOG(INFO) << "Registrar listening @" << config_.registrarAddress << ":" << config_.registrarPort;
 
     gatewayNode_ = std::make_unique<GatewayNode>(config_);
-    std::cout << "Gateway listening @" << config_.gatewayAddress << ":" << config_.gatewayPort << "\n";
+    LOG(INFO) << "Gateway listening @" << config_.gatewayAddress << ":" << config_.gatewayPort;
 }
 
 void SwgChatApp::Tick() {
