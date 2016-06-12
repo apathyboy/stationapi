@@ -12,6 +12,7 @@ struct ReqCreateRoom;
 struct ReqEnterRoom;
 struct ReqGetRoom;
 struct ReqGetRoomSummaries;
+struct ReqGetPersistentHeaders;
 struct ReqSetApiVersion;
 struct ReqSetAvatarAttributes;
 struct ReqGetAnyAvatar;
@@ -30,6 +31,7 @@ private:
     void HandleEnterRoom(const ReqEnterRoom& request);
     void HandleGetRoom(const ReqGetRoom& request);
     void HandleGetRoomSummaries(const ReqGetRoomSummaries& request);
+    void HandleGetPersistentHeaders(const ReqGetPersistentHeaders& request);
     void HandleSetApiVersion(const ReqSetApiVersion& request);
     void HandleSetAvatarAttributes(const ReqSetAvatarAttributes& request);
     void HandleGetAnyAvatar(const ReqGetAnyAvatar& request);

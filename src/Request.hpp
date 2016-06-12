@@ -214,6 +214,22 @@ void read(StreamT& ar, ReqGetRoomSummaries& data) {
     read(ar, data.roomFilter);
 }
 
+/** Begin GETPERSISTENTHEADERS */
+
+struct ReqGetPersistentHeaders {
+    const ChatRequestType type = ChatRequestType::GETPERSISTENTHEADERS;
+    uint32_t track;
+    uint32_t avatarId;
+    std::wstring category;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqGetPersistentHeaders& data) {
+    read(ar, data.track);
+    read(ar, data.avatarId);
+    read(ar, data.category);
+}
+
 /** Begin SETAPIVERSION */
 
 struct ReqSetApiVersion {

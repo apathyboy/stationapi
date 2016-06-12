@@ -41,6 +41,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::GETROOMSUMMARIES:
         HandleGetRoomSummaries(::read<ReqGetRoomSummaries>(istream));
         break;
+    case ChatRequestType::GETPERSISTENTHEADERS:
+        HandleGetPersistentHeaders(::read<ReqGetPersistentHeaders>(istream));
+        break;
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
         break;
@@ -142,6 +145,8 @@ void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
 
     Send(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
 }
+
+void GatewayClient::HandleGetPersistentHeaders(const ReqGetPersistentHeaders & request) {}
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
     uint32_t version = node_->GetConfig().version;
