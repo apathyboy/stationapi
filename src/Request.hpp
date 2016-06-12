@@ -228,6 +228,26 @@ void read(StreamT& ar, ReqSetApiVersion& data) {
     read(ar, data.version);
 }
 
+/** Begin SETAVATARATTRIBUTES */
+
+struct ReqSetAvatarAttributes {
+    const ChatRequestType type = ChatRequestType::SETAVATARATTRIBUTES;
+    uint32_t track;
+    uint32_t avatarId;
+    uint32_t avatarAttributes;
+    uint32_t persistent;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqSetAvatarAttributes& data) {
+    read(ar, data.track);
+    read(ar, data.avatarId);
+    read(ar, data.avatarAttributes);
+    read(ar, data.persistent);
+    read(ar, data.srcAddress);
+}
+
 /** Begin GETANYAVATAR */
 
 struct ReqGetAnyAvatar {

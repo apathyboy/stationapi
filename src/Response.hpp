@@ -294,6 +294,31 @@ void write(StreamT& ar, const ResSetApiVersion& data) {
     write(ar, data.version);
 }
 
+/** Begin SETAVATARATTRIBUTES */
+
+struct ResSetAvatarAttributes {
+    ResSetAvatarAttributes(uint32_t track_, ChatResultCode result_, ChatAvatar* avatar_)
+        : track{track_}
+        , result{result_}
+        , avatar{avatar_} {}
+
+    const ChatResponseType type = ChatResponseType::SETAVATARATTRIBUTES;
+    uint32_t track;
+    ChatResultCode result;
+    ChatAvatar* avatar;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResSetAvatarAttributes& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    if (data.result == ChatResultCode::SUCCESS) {
+        write(ar, *data.avatar);
+    }
+}
+
 /** Begin GETANYAVATAR */
 
 struct ResGetAnyAvatar {

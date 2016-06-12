@@ -44,6 +44,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
         break;
+    case ChatRequestType::SETAVATARATTRIBUTES:
+        HandleSetAvatarAttributes(::read<ReqSetAvatarAttributes>(istream));
+        break;
     case ChatRequestType::GETANYAVATAR:
         HandleGetAnyAvatar(::read<ReqGetAnyAvatar>(istream));
         break;
@@ -150,6 +153,27 @@ void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
     node_->GetRoomService()->LoadRoomsFromStorage();
 
     Send(ResSetApiVersion{request.track, result, version});
+}
+
+void GatewayClient::HandleSetAvatarAttributes(const ReqSetAvatarAttributes & request) {
+    auto avatarService = node_->GetAvatarService();
+
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    ChatAvatar* avatar = avatarService->GetOnlineAvatar(request.avatarId);
+
+    if (avatar) {
+        if (avatar->attributes != request.avatarAttributes) {
+            avatar->attributes = request.avatarAttributes;
+
+            if (request.persistent != 0) {
+                avatarService->PersistAvatar(*avatar);
+            }
+        }
+    } else {
+        result = ChatResultCode::SRCAVATARDOESNTEXIST;
+    }
+
+    Send(ResSetAvatarAttributes{request.track, result, avatar});
 }
 
 void GatewayClient::HandleGetAnyAvatar(const ReqGetAnyAvatar& request) {

@@ -13,6 +13,7 @@ struct ReqEnterRoom;
 struct ReqGetRoom;
 struct ReqGetRoomSummaries;
 struct ReqSetApiVersion;
+struct ReqSetAvatarAttributes;
 struct ReqGetAnyAvatar;
 
 class GatewayClient : public NodeClient<8192> {
@@ -30,6 +31,7 @@ private:
     void HandleGetRoom(const ReqGetRoom& request);
     void HandleGetRoomSummaries(const ReqGetRoomSummaries& request);
     void HandleSetApiVersion(const ReqSetApiVersion& request);
+    void HandleSetAvatarAttributes(const ReqSetAvatarAttributes& request);
     void HandleGetAnyAvatar(const ReqGetAnyAvatar& request);
     
     GatewayNode* node_;

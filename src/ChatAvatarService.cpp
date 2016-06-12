@@ -135,6 +135,39 @@ ChatResultCode ChatAvatarService::PersistNewAvatar(ChatAvatar& avatar) {
     return result;
 }
 
+ChatResultCode ChatAvatarService::PersistAvatar(ChatAvatar & avatar) {
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    sqlite3_stmt* stmt;
+
+    char sql[] = "UPDATE avatar SET user_id = @user_id, name = @name, address = @address, attributes = @attributes "
+                 "WHERE id = @avatar_id";
+
+    if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
+        result = ChatResultCode::DBFAIL;
+    } else {
+        std::string nameStr = FromWideString(avatar.name);
+        std::string addressStr = FromWideString(avatar.address);
+
+        int userIdIdx = sqlite3_bind_parameter_index(stmt, "@user_id");
+        int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
+        int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
+        int attributesIdx = sqlite3_bind_parameter_index(stmt, "@attributes");
+        int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+
+        sqlite3_bind_int(stmt, userIdIdx, avatar.userId);
+        sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
+        sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
+        sqlite3_bind_int(stmt, attributesIdx, avatar.attributes);
+        sqlite3_bind_int(stmt, avatarIdIdx, avatar.avatarId);
+
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
+            result = ChatResultCode::DBFAIL;
+        }
+    }
+
+    return result;
+}
+
 std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::CreateAvatar(
     const std::wstring& name, const std::wstring& address, uint32_t userId,
     uint32_t loginAttributes, const std::wstring& loginLocation) {
