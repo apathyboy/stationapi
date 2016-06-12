@@ -45,7 +45,9 @@ SwgChatConfig BuildConfiguration(int argc, char* argv[]) {
     generic.add_options()
         ("help,h", "produces help message")
         ("config,c", po::value<std::string>(&configFile)->default_value("swgchat.cfg"),
-         "sets path to the configuration file")
+            "sets path to the configuration file")
+        ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("logger.cfg"),
+            "setspath to the logger configuration file")
         ;
 
     po::options_description options("Configuration");
@@ -60,8 +62,6 @@ SwgChatConfig BuildConfiguration(int argc, char* argv[]) {
             "port for registrar connections")
         ("database_path", po::value<std::string>(&config.chatDatabasePath)->default_value("chat.db"),
             "path to the sqlite3 database file")
-        ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("logger.cfg"),
-            "path to the logger configuration")
         ;
 
     po::options_description cmdline_options;
