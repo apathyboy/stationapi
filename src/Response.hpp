@@ -115,6 +115,25 @@ void write(StreamT& ar, const ResLoginAvatar& data) {
     }
 }
 
+/** Begin LOGOUTAVATAR */
+
+struct ResLogoutAvatar {
+    ResLogoutAvatar(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    const ChatResponseType type = ChatResponseType::LOGOUTAVATAR;
+    uint32_t track;
+    ChatResultCode result;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResLogoutAvatar& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+}
+
 /** Begin CREATEROOM */
 
 struct ResCreateRoom {

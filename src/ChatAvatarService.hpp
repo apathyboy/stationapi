@@ -39,6 +39,8 @@ public:
 
     ChatResultCode LoginAvatar(ChatAvatar& avatar);
 
+    void LogoutAvatar(uint32_t avatarId);
+
 private:
     std::unordered_map<std::wstring, ChatAvatar> onlineAvatars_;
     sqlite3* db_;

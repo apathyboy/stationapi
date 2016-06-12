@@ -157,3 +157,13 @@ ChatResultCode ChatAvatarService::LoginAvatar(ChatAvatar& avatar) {
 
     return result;
 }
+
+void ChatAvatarService::LogoutAvatar(uint32_t avatarId) {
+    auto find_iter = std::find_if(std::begin(onlineAvatars_), std::end(onlineAvatars_), [avatarId](auto& avatarIter) {
+        return avatarIter.second.avatarId == avatarId;
+    });
+
+    if (find_iter != std::end(onlineAvatars_)) {
+        onlineAvatars_.erase(find_iter);
+    }
+}

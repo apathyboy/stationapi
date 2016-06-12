@@ -29,6 +29,8 @@ public:
     
     ChatResultCode EnterRoom(ChatAvatar* avatar, const std::wstring& password);
     bool IsInRoom(ChatAvatar* avatar) const;
+    bool IsInRoom(uint32_t avatarId) const;
+    void ExitRoom(uint32_t avatarId);
 
     uint32_t GetCreatorId() const { return creatorId_; }
     const std::wstring& GetCreatorName() const { return creatorName_; }

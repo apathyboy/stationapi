@@ -9,6 +9,8 @@
 #include "SwgChatConfig.hpp"
 #include "UdpLibrary.hpp"
 
+#include "easylogging++.h"
+
 GatewayClient::GatewayClient(UdpConnection* connection, GatewayNode* node)
     : NodeClient<8192>(connection)
     , node_{node} {
@@ -23,6 +25,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     switch (request_type) {
     case ChatRequestType::LOGINAVATAR:
         HandleLoginAvatar(::read<ReqLoginAvatar>(istream));
+        break;
+    case ChatRequestType::LOGOUTAVATAR:
+        HandleLogoutAvatar(::read<ReqLogoutAvatar>(istream));
         break;
     case ChatRequestType::CREATEROOM:
         HandleCreateRoom(::read<ReqCreateRoom>(istream));
@@ -43,6 +48,7 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
         HandleGetAnyAvatar(::read<ReqGetAnyAvatar>(istream));
         break;
     default:
+        LOG(INFO) << "Unknown request type received: " << static_cast<uint16_t>(request_type);
         break;
     }
 }
@@ -72,6 +78,13 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
     }
 
     Send(ResLoginAvatar{request.track, result, avatar});
+}
+
+void GatewayClient::HandleLogoutAvatar(const ReqLogoutAvatar & request) {
+    node_->GetAvatarService()->LogoutAvatar(request.avatarId);
+    node_->GetRoomService()->LogoutFromAllRooms(request.avatarId);
+
+    Send(ResLogoutAvatar{request.track, ChatResultCode::SUCCESS});
 }
 
 void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {

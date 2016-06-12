@@ -108,6 +108,20 @@ void read(StreamT& ar, ReqLoginAvatar& data) {
     read(ar, data.loginAttributes);
 }
 
+/** Begin LOGOUTAVATAR */
+
+struct ReqLogoutAvatar {
+    const ChatRequestType type = ChatRequestType::LOGOUTAVATAR;
+    uint32_t track;
+    uint32_t avatarId;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqLogoutAvatar& data) {
+    read(ar, data.track);
+    read(ar, data.avatarId);
+}
+
 /** Begin CREATEROOM */
 
 struct ReqCreateRoom {
