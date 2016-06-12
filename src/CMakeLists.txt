@@ -21,6 +21,9 @@ add_executable(swgchat
     main.cpp
     Node.hpp
     NodeClient.hpp
+    PersistentMessage.hpp
+    PersistentMessageService.cpp
+    PersistentMessageService.hpp
     RegistrarClient.cpp
     RegistrarClient.hpp
     RegistrarNode.cpp
