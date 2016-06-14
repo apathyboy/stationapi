@@ -170,7 +170,7 @@ void GatewayClient::HandleSendPersistentMessage(const ReqSendPersistentMessage& 
 
     std::tie(result, destAvatar) = avatarService->GetAvatar(request.destName, request.destAddress);
 
-    if (destAvatar != boost::none) {
+    if (destAvatar) {
         if (request.avatarPresence) {
             auto avatar = avatarService->GetOnlineAvatar(request.srcAvatarId);
 
