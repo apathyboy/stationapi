@@ -18,3 +18,15 @@ CREATE TABLE room (id INTEGER PRIMARY KEY,
                    room_message_id INTEGER,
                    created_at INTEGER,
                    node_level INTEGER);
+
+CREATE TABLE persistent_message (id INTEGER PRIMARY KEY,
+                                 avatar_id INTEGER,
+                                 from_name TEXT,
+                                 from_address TEXT,
+                                 subject TEXT,
+                                 sent_time INTEGER,
+                                 status INTEGER,
+                                 folder TEXT,
+                                 category TEXT,
+                                 message TEXT,
+                                 oob TEXT);
