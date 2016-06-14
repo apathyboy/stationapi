@@ -181,3 +181,9 @@ ChatRoom* ChatRoomService::GetRoom(const std::wstring& roomAddress) {
 
     return room;
 }
+
+void ChatRoomService::LogoutFromAllRooms(uint32_t avatarId) {
+    for (auto& room : rooms_) {
+        room.ExitRoom(avatarId);
+    }
+}

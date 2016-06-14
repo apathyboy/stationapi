@@ -33,6 +33,8 @@ public:
     bool RoomExists(const std::wstring& roomAddress) const;
     ChatRoom* GetRoom(const std::wstring& roomAddress);
 
+    void LogoutFromAllRooms(uint32_t avatarId);
+
 private:
     std::vector<ChatRoom> rooms_;
     sqlite3* db_;

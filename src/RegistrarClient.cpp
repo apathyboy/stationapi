@@ -32,5 +32,5 @@ void RegistrarClient::HandleGetChatServer(const ReqRegistrarGetChatServer& reque
     ResRegistrarGetChatServer response{request.track, ChatResultCode::SUCCESS,
         ToWideString(config.gatewayAddress), config.gatewayPort};
 
-    SendMessage(response);
+    Send(response);
 }

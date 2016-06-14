@@ -4,10 +4,15 @@
 #include "ChatAvatarService.hpp"
 #include "ChatRoomService.hpp"
 #include "GatewayNode.hpp"
+#include "PersistentMessageService.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "SwgChatConfig.hpp"
 #include "UdpLibrary.hpp"
+
+#include "easylogging++.h"
+
+#include <ctime>
 
 GatewayClient::GatewayClient(UdpConnection* connection, GatewayNode* node)
     : NodeClient<8192>(connection)
@@ -24,6 +29,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::LOGINAVATAR:
         HandleLoginAvatar(::read<ReqLoginAvatar>(istream));
         break;
+    case ChatRequestType::LOGOUTAVATAR:
+        HandleLogoutAvatar(::read<ReqLogoutAvatar>(istream));
+        break;
     case ChatRequestType::CREATEROOM:
         HandleCreateRoom(::read<ReqCreateRoom>(istream));
         break;
@@ -36,13 +44,29 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::GETROOMSUMMARIES:
         HandleGetRoomSummaries(::read<ReqGetRoomSummaries>(istream));
         break;
+    case ChatRequestType::SENDPERSISTENTMESSAGE:
+        HandleSendPersistentMessage(::read<ReqSendPersistentMessage>(istream));
+        break;
+    case ChatRequestType::GETPERSISTENTHEADERS:
+        HandleGetPersistentHeaders(::read<ReqGetPersistentHeaders>(istream));
+        break;
+    case ChatRequestType::GETPERSISTENTMESSAGE:
+        HandleGetPersistentMessage(::read<ReqGetPersistentMessage>(istream));
+        break;
+    case ChatRequestType::UPDATEPERSISTENTMESSAGE:
+        HandleUpdatePersistentMessage(::read<ReqUpdatePersistentMessage>(istream));
+        break;
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
+        break;
+    case ChatRequestType::SETAVATARATTRIBUTES:
+        HandleSetAvatarAttributes(::read<ReqSetAvatarAttributes>(istream));
         break;
     case ChatRequestType::GETANYAVATAR:
         HandleGetAnyAvatar(::read<ReqGetAnyAvatar>(istream));
         break;
     default:
+        LOG(INFO) << "Unknown request type received: " << static_cast<uint16_t>(request_type);
         break;
     }
 }
@@ -71,7 +95,14 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
         }
     }
 
-    SendMessage(ResLoginAvatar{request.track, result, avatar});
+    Send(ResLoginAvatar{request.track, result, avatar});
+}
+
+void GatewayClient::HandleLogoutAvatar(const ReqLogoutAvatar& request) {
+    node_->GetAvatarService()->LogoutAvatar(request.avatarId);
+    node_->GetRoomService()->LogoutFromAllRooms(request.avatarId);
+
+    Send(ResLogoutAvatar{request.track, ChatResultCode::SUCCESS});
 }
 
 void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
@@ -88,7 +119,7 @@ void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
             request.roomMaxSize, request.roomAddress, request.srcAddress);
     }
 
-    SendMessage(ResCreateRoom{request.track, result, room});
+    Send(ResCreateRoom{request.track, result, room});
 }
 
 void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
@@ -109,14 +140,14 @@ void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
         }
     }
 
-    SendMessage(ResEnterRoom{request.track, result, room});
+    Send(ResEnterRoom{request.track, result, room});
 }
 
 void GatewayClient::HandleGetRoom(const ReqGetRoom& request) {
     auto room = node_->GetRoomService()->GetRoom(request.roomAddress);
     ChatResultCode result
         = (room != nullptr) ? ChatResultCode::SUCCESS : ChatResultCode::ADDRESSDOESNTEXIST;
-    SendMessage(ResGetRoom{request.track, result, room});
+    Send(ResGetRoom{request.track, result, room});
 }
 
 void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
@@ -124,7 +155,65 @@ void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
 
     auto rooms = roomService->GetRoomSummaries(request.startNodeAddress, request.roomFilter);
 
-    SendMessage(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
+    Send(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
+}
+
+void GatewayClient::HandleSendPersistentMessage(const ReqSendPersistentMessage& request) {
+    ChatResultCode result = ChatResultCode::SUCCESS;
+
+    auto avatarService = node_->GetAvatarService();
+    auto messageService = node_->GetMessageService();
+    
+    PersistentMessage message;
+
+    boost::optional<ChatAvatar> destAvatar;
+
+    std::tie(result, destAvatar) = avatarService->GetAvatar(request.destName, request.destAddress);
+
+    if (destAvatar) {
+        if (request.avatarPresence) {
+            auto avatar = avatarService->GetOnlineAvatar(request.srcAvatarId);
+
+            message.header.fromName = avatar->name;
+            message.header.fromAddress = avatar->address;
+        } else {
+            message.header.fromName = request.srcName;
+        }
+
+        message.header.sentTime = static_cast<uint32_t>(std::time(nullptr));
+        message.header.avatarId = destAvatar->avatarId;
+        message.header.subject = request.subject;
+        message.header.category = request.category;
+        message.message = request.msg;
+        message.oob = request.oob;
+
+        messageService->PersistNewMessage(message);
+    }
+
+    Send(ResSendPeristentMessage{request.track, result, message.header.messageId});
+}
+
+void GatewayClient::HandleGetPersistentHeaders(const ReqGetPersistentHeaders& request) {
+    auto headers = node_->GetMessageService()->GetMessageHeaders(request.avatarId);
+
+    Send(ResGetPersistentHeaders{request.track, ChatResultCode::SUCCESS, std::move(headers)});
+}
+
+void GatewayClient::HandleGetPersistentMessage(const ReqGetPersistentMessage& request) {
+    ChatResultCode result;
+    boost::optional<PersistentMessage> message;
+
+    std::tie(result, message)
+        = node_->GetMessageService()->GetPersistentMessage(request.srcAvatarId, request.messageId);
+
+    Send(ResGetPersistentMessage{request.track, result, message});
+}
+
+void GatewayClient::HandleUpdatePersistentMessage(const ReqUpdatePersistentMessage& request) {
+    node_->GetMessageService()->UpdateMessageStatus(
+        request.srcAvatarId, request.messageId, request.status);
+
+    Send(ResUpdatePersistentMessage{request.track, ChatResultCode::SUCCESS});
 }
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
@@ -136,7 +225,28 @@ void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
     node_->GetAvatarService()->ClearOnlineAvatars();
     node_->GetRoomService()->LoadRoomsFromStorage();
 
-    SendMessage(ResSetApiVersion{request.track, result, version});
+    Send(ResSetApiVersion{request.track, result, version});
+}
+
+void GatewayClient::HandleSetAvatarAttributes(const ReqSetAvatarAttributes& request) {
+    auto avatarService = node_->GetAvatarService();
+
+    ChatResultCode result = ChatResultCode::SUCCESS;
+    ChatAvatar* avatar = avatarService->GetOnlineAvatar(request.avatarId);
+
+    if (avatar) {
+        if (avatar->attributes != request.avatarAttributes) {
+            avatar->attributes = request.avatarAttributes;
+
+            if (request.persistent != 0) {
+                avatarService->PersistAvatar(*avatar);
+            }
+        }
+    } else {
+        result = ChatResultCode::SRCAVATARDOESNTEXIST;
+    }
+
+    Send(ResSetAvatarAttributes{request.track, result, avatar});
 }
 
 void GatewayClient::HandleGetAnyAvatar(const ReqGetAnyAvatar& request) {
@@ -148,5 +258,5 @@ void GatewayClient::HandleGetAnyAvatar(const ReqGetAnyAvatar& request) {
     std::tie(result, avatar) = avatarService->GetAvatar(request.name, request.address);
     bool isOnline = (avatar) ? avatar->isOnline : false;
 
-    SendMessage(ResGetAnyAvatar{request.track, result, isOnline, avatar});
+    Send(ResGetAnyAvatar{request.track, result, isOnline, avatar});
 }

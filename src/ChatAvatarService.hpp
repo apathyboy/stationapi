@@ -33,11 +33,15 @@ public:
 
     ChatResultCode PersistNewAvatar(ChatAvatar& avatar);
 
+    ChatResultCode PersistAvatar(ChatAvatar& avatar);
+
     std::pair<ChatResultCode, boost::optional<ChatAvatar>> CreateAvatar(const std::wstring& name,
         const std::wstring& address, uint32_t userId, uint32_t loginAttributes,
         const std::wstring& loginLocation);
 
     ChatResultCode LoginAvatar(ChatAvatar& avatar);
+
+    void LogoutAvatar(uint32_t avatarId);
 
 private:
     std::unordered_map<std::wstring, ChatAvatar> onlineAvatars_;
