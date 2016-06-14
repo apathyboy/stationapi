@@ -79,6 +79,10 @@ std::vector<PersistentHeader> PersistentMessageService::GetMessageHeaders(uint32
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
         throw std::runtime_error("Error preparing SQL statement");
     } else {
+        int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+
+        sqlite3_bind_int(stmt, avatarIdIdx, avatarId);
+
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             PersistentHeader header;
 

@@ -13,15 +13,15 @@ enum class PersistentState : uint32_t {
 };
 
 struct PersistentHeader {
-    uint32_t messageId;
+    uint32_t messageId = 0;
     uint32_t avatarId;
     std::wstring fromName;
     std::wstring fromAddress;
     std::wstring subject;
-    uint32_t sentTime;
-    PersistentState status;
-    std::wstring folder;
-    std::wstring category;
+    uint32_t sentTime = 0;
+    PersistentState status = PersistentState::NEW;
+    std::wstring folder = L"";
+    std::wstring category = L"";
 };
 
 struct PersistentMessage {

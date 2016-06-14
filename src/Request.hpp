@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "PersistentMessage.hpp"
 #include "Serialization.hpp"
 
 #include <cstdint>
@@ -214,6 +215,45 @@ void read(StreamT& ar, ReqGetRoomSummaries& data) {
     read(ar, data.roomFilter);
 }
 
+/** Begin SENDPERSISTENTMESSAGE */
+
+struct ReqSendPersistentMessage {
+    const ChatRequestType type = ChatRequestType::SENDPERSISTENTMESSAGE;
+    uint32_t track;
+    uint16_t avatarPresence;
+    uint32_t srcAvatarId;
+    std::wstring srcName;
+    std::wstring destName;
+    std::wstring destAddress;
+    std::wstring subject;
+    std::wstring msg;
+    std::wstring oob;
+    std::wstring category;
+    bool enforceInboxLimit;
+    uint32_t categoryLimit;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqSendPersistentMessage& data) {
+    read(ar, data.track);
+    read(ar, data.avatarPresence);
+
+    if (data.avatarPresence) {
+        read(ar, data.srcAvatarId);
+    } else {
+        read(ar, data.srcName);
+    }
+
+    read(ar, data.destName);
+    read(ar, data.destAddress);
+    read(ar, data.subject);
+    read(ar, data.msg);
+    read(ar, data.oob);
+    read(ar, data.category);
+    read(ar, data.enforceInboxLimit);
+    read(ar, data.categoryLimit);
+}
+
 /** Begin GETPERSISTENTHEADERS */
 
 struct ReqGetPersistentHeaders {
@@ -228,6 +268,40 @@ void read(StreamT& ar, ReqGetPersistentHeaders& data) {
     read(ar, data.track);
     read(ar, data.avatarId);
     read(ar, data.category);
+}
+
+/** Begin GETPERSISTENTMESSAGE */
+
+struct ReqGetPersistentMessage {
+    const ChatRequestType type = ChatRequestType::GETPERSISTENTMESSAGE;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    uint32_t messageId;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqGetPersistentMessage& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.messageId);
+}
+
+/** Begin UPDATEPERSISTENTMESSAGE */
+
+struct ReqUpdatePersistentMessage {
+    const ChatRequestType type = ChatRequestType::UPDATEPERSISTENTMESSAGE;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    uint32_t messageId;
+    PersistentState status;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqUpdatePersistentMessage& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.messageId);
+    read(ar, data.status);
 }
 
 /** Begin SETAPIVERSION */

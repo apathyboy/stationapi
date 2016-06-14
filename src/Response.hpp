@@ -273,6 +273,31 @@ void write(StreamT& ar, const ResGetRoomSummaries& data) {
     }
 }
 
+/** Begin SENDPERSISTENTMESSAGE */
+
+struct ResSendPeristentMessage {
+    ResSendPeristentMessage(uint32_t track_, ChatResultCode result_, uint32_t messageId_)
+        : track{track_}
+        , result{result_}
+        , messageId{messageId_} {}
+
+    const ChatResponseType type = ChatResponseType::SENDPERSISTENTMESSAGE;
+    uint32_t track;
+    ChatResultCode result;
+    uint32_t messageId;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResSendPeristentMessage& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+    
+    if (data.result == ChatResultCode::SUCCESS) {
+        write(ar, data.messageId);
+    }
+}
+
 /** Begin GETPERSISTENTHEADERS */
 
 struct ResGetPersistentHeaders {
@@ -297,6 +322,50 @@ void write(StreamT& ar, const ResGetPersistentHeaders& data) {
     for (auto& header : data.headers) {
         write(ar, header);
     }
+}
+
+/** Begin GETPERSISTENTMESSAGE */
+
+struct ResGetPersistentMessage {
+    ResGetPersistentMessage(uint32_t track_, ChatResultCode result_, boost::optional<PersistentMessage> message_)
+        : track{track_}
+        , result{result_}
+        , message{message_} {}
+
+    const ChatResponseType type = ChatResponseType::GETPERSISTENTMESSAGE;
+    uint32_t track;
+    ChatResultCode result;
+    boost::optional<PersistentMessage> message;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResGetPersistentMessage& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    if (data.result == ChatResultCode::SUCCESS) {
+        write(ar, *data.message);
+    }
+}
+
+/** Begin UPDATEPERSISTENTMESSAGE */
+
+struct ResUpdatePersistentMessage {
+    ResUpdatePersistentMessage(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    const ChatResponseType type = ChatResponseType::UPDATEPERSISTENTMESSAGE;
+    uint32_t track;
+    ChatResultCode result;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResUpdatePersistentMessage& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
 }
 
 /** Begin SETAPIVERSION */
