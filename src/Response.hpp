@@ -4,6 +4,7 @@
 #include "ChatAvatar.hpp"
 #include "ChatEnums.hpp"
 #include "ChatRoom.hpp"
+#include "PersistentMessage.hpp"
 #include "Serialization.hpp"
 
 #include <boost/optional.hpp>
@@ -269,6 +270,32 @@ void write(StreamT& ar, const ResGetRoomSummaries& data) {
         write(ar, room->GetRoomAttributes());
         write(ar, room->GetCurrentRoomSize());
         write(ar, room->GetMaxRoomSize());
+    }
+}
+
+/** Begin GETPERSISTENTHEADERS */
+
+struct ResGetPersistentHeaders {
+    ResGetPersistentHeaders(uint32_t track_, ChatResultCode result_, std::vector<PersistentHeader> headers_)
+        : track{track_}
+        , result{result_}
+        , headers{headers_} {}
+
+    const ChatResponseType type = ChatResponseType::GETPERSISTENTHEADERS;
+    uint32_t track;
+    ChatResultCode result;
+    std::vector<PersistentHeader> headers;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResGetPersistentHeaders& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+    write(ar, static_cast<uint32_t>(data.headers.size()));
+
+    for (auto& header : data.headers) {
+        write(ar, header);
     }
 }
 

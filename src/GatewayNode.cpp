@@ -3,6 +3,7 @@
 
 #include "ChatAvatarService.hpp"
 #include "ChatRoomService.hpp"
+#include "PersistentMessageService.hpp"
 #include "SwgChatConfig.hpp"
 
 #include <sqlite3.h>
@@ -16,6 +17,7 @@ GatewayNode::GatewayNode(SwgChatConfig& config)
 
     avatarService_ = std::make_unique<ChatAvatarService>(db_);
     roomService_ = std::make_unique<ChatRoomService>(db_);
+    messageService_ = std::make_unique<PersistentMessageService>(db_);
 }
 
 GatewayNode::~GatewayNode() {
@@ -28,6 +30,10 @@ ChatAvatarService* GatewayNode::GetAvatarService() {
 
 ChatRoomService * GatewayNode::GetRoomService() {
     return roomService_.get();
+}
+
+PersistentMessageService * GatewayNode::GetMessageService() {
+    return messageService_.get();
 }
 
 SwgChatConfig& GatewayNode::GetConfig() {

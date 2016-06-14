@@ -132,6 +132,8 @@ ChatResultCode ChatAvatarService::PersistNewAvatar(ChatAvatar& avatar) {
         }
     }
 
+    sqlite3_finalize(stmt);
+
     return result;
 }
 
@@ -164,6 +166,8 @@ ChatResultCode ChatAvatarService::PersistAvatar(ChatAvatar & avatar) {
             result = ChatResultCode::DBFAIL;
         }
     }
+
+    sqlite3_finalize(stmt);
 
     return result;
 }

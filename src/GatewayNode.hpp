@@ -8,6 +8,7 @@
 
 class ChatAvatarService;
 class ChatRoomService;
+class PersistentMessageService;
 struct SwgChatConfig;
 struct sqlite3;
 
@@ -18,6 +19,8 @@ public:
 
     ChatAvatarService* GetAvatarService();
     ChatRoomService* GetRoomService();
+    PersistentMessageService* GetMessageService();
+
     SwgChatConfig& GetConfig();
 
 private:
@@ -25,6 +28,7 @@ private:
 
     std::unique_ptr<ChatAvatarService> avatarService_;
     std::unique_ptr<ChatRoomService> roomService_;
+    std::unique_ptr<PersistentMessageService> messageService_;
     SwgChatConfig& config_;
     sqlite3* db_;
 };

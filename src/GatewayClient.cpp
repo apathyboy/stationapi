@@ -4,6 +4,7 @@
 #include "ChatAvatarService.hpp"
 #include "ChatRoomService.hpp"
 #include "GatewayNode.hpp"
+#include "PersistentMessageService.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "SwgChatConfig.hpp"
@@ -146,7 +147,11 @@ void GatewayClient::HandleGetRoomSummaries(const ReqGetRoomSummaries& request) {
     Send(ResGetRoomSummaries{request.track, ChatResultCode::SUCCESS, rooms});
 }
 
-void GatewayClient::HandleGetPersistentHeaders(const ReqGetPersistentHeaders & request) {}
+void GatewayClient::HandleGetPersistentHeaders(const ReqGetPersistentHeaders & request) {
+    auto headers = node_->GetMessageService()->GetMessageHeaders(request.avatarId);
+
+    Send(ResGetPersistentHeaders{request.track, ChatResultCode::SUCCESS, std::move(headers)});
+}
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
     uint32_t version = node_->GetConfig().version;
