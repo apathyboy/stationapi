@@ -151,6 +151,22 @@ void read(StreamT& ar, ReqCreateRoom& data) {
     read(ar, data.srcAddress);
 }
 
+/** Begin FRIENDSTATUS */
+
+struct ReqFriendStatus {
+    const ChatRequestType type = ChatRequestType::FRIENDSTATUS;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqFriendStatus& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.srcAddress);
+}
+
 /** Begin ENTERROOM */
 
 struct ReqEnterRoom {
