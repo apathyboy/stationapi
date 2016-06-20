@@ -4,6 +4,7 @@
 #include "ChatAvatar.hpp"
 #include "ChatEnums.hpp"
 #include "ChatRoom.hpp"
+#include "Contact.hpp"
 #include "PersistentMessage.hpp"
 #include "Serialization.hpp"
 
@@ -164,6 +165,109 @@ void write(StreamT& ar, const ResCreateRoom& data) {
             write(ar, *room);
         }
     }
+}
+
+/** Begin ADDFRIEND */
+
+struct ResAddFriend {
+    ResAddFriend(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    const ChatResponseType type = ChatResponseType::ADDFRIEND;
+    uint32_t track;
+    ChatResultCode result;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResAddFriend& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+}
+
+/** Begin REMOVEFRIEND */
+
+struct ResRemoveFriend {
+    ResRemoveFriend(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    const ChatResponseType type = ChatResponseType::REMOVEFRIEND;
+    uint32_t track;
+    ChatResultCode result;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResRemoveFriend& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+}
+
+/** Begin FRIENDSTATUS */
+
+struct ResFriendStatus {
+    ResFriendStatus(uint32_t track_, ChatResultCode result_, std::vector<FriendStatus> friends_)
+        : track{track_}
+        , result{result_}
+        , friends{friends_} {}
+
+    const ChatResponseType type = ChatResponseType::FRIENDSTATUS;
+    uint32_t track;
+    ChatResultCode result;
+    std::vector<FriendStatus> friends;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResFriendStatus& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+
+    write(ar, static_cast<uint32_t>(data.friends.size()));
+
+    for (auto& friendState : data.friends) {
+        write(ar, friendState);
+    }
+}
+
+/** Begin ADDIGNORE */
+
+struct ResAddIgnore {
+    ResAddIgnore(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    const ChatResponseType type = ChatResponseType::ADDIGNORE;
+    uint32_t track;
+    ChatResultCode result;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResAddIgnore& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+}
+
+/** Begin REMOVEIGNORE */
+
+struct ResRemoveIgnore {
+    ResRemoveIgnore(uint32_t track_, ChatResultCode result_)
+        : track{track_}
+        , result{result_} {}
+
+    const ChatResponseType type = ChatResponseType::REMOVEIGNORE;
+    uint32_t track;
+    ChatResultCode result;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResRemoveIgnore& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
 }
 
 /** Begin ENTERROOM */
@@ -366,6 +470,32 @@ void write(StreamT& ar, const ResUpdatePersistentMessage& data) {
     write(ar, data.type);
     write(ar, data.track);
     write(ar, data.result);
+}
+
+/** Begin IGNORESTATUS */
+
+struct ResIgnoreStatus {
+    ResIgnoreStatus(uint32_t track_, ChatResultCode result_, std::vector<IgnoreStatus> ignore_)
+        : track{track_}
+        , result{result_}
+        , ignore{ignore_} {}
+
+    const ChatResponseType type = ChatResponseType::IGNORESTATUS;
+    uint32_t track;
+    ChatResultCode result;
+    std::vector<IgnoreStatus> ignore;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const ResIgnoreStatus& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.result);
+    
+    write(ar, static_cast<uint32_t>(data.ignore.size()));
+    for (auto& ignoreStatus : data.ignore) {
+        write(ar, ignoreStatus);
+    }
 }
 
 /** Begin SETAPIVERSION */

@@ -3,6 +3,7 @@
 
 #include "ChatAvatarService.hpp"
 #include "ChatRoomService.hpp"
+#include "ContactService.hpp"
 #include "GatewayNode.hpp"
 #include "PersistentMessageService.hpp"
 #include "Request.hpp"
@@ -35,6 +36,21 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
     case ChatRequestType::CREATEROOM:
         HandleCreateRoom(::read<ReqCreateRoom>(istream));
         break;
+    case ChatRequestType::ADDFRIEND:
+        HandleAddFriend(::read<ReqAddFriend>(istream));
+        break;
+    case ChatRequestType::REMOVEFRIEND:
+        HandleRemoveFriend(::read<ReqRemoveFriend>(istream));
+        break;
+    case ChatRequestType::FRIENDSTATUS:
+        HandleFriendStatus(::read<ReqFriendStatus>(istream));
+        break;
+    case ChatRequestType::ADDIGNORE:
+        HandleAddIgnore(::read<ReqAddIgnore>(istream));
+        break;
+    case ChatRequestType::REMOVEIGNORE:
+        HandleRemoveIgnore(::read<ReqRemoveIgnore>(istream));
+        break;
     case ChatRequestType::ENTERROOM:
         HandleEnterRoom(::read<ReqEnterRoom>(istream));
         break;
@@ -55,6 +71,9 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
         break;
     case ChatRequestType::UPDATEPERSISTENTMESSAGE:
         HandleUpdatePersistentMessage(::read<ReqUpdatePersistentMessage>(istream));
+        break;
+    case ChatRequestType::IGNORESTATUS:
+        HandleIgnoreStatus(::read<ReqIgnoreStatus>(istream));
         break;
     case ChatRequestType::SETAPIVERSION:
         HandleSetApiVersion(::read<ReqSetApiVersion>(istream));
@@ -120,6 +139,39 @@ void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
     }
 
     Send(ResCreateRoom{request.track, result, room});
+}
+
+void GatewayClient::HandleAddFriend(const ReqAddFriend & request) {
+    ChatResultCode result = node_->GetContactService()->AddFriend(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress, request.comment);
+
+    Send(ResAddFriend{request.track, result});
+}
+
+void GatewayClient::HandleRemoveFriend(const ReqRemoveFriend & request) {
+    ChatResultCode result = node_->GetContactService()->RemoveFriend(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress);
+
+    Send(ResRemoveFriend{request.track, result});
+}
+
+void GatewayClient::HandleFriendStatus(const ReqFriendStatus & request) {
+    ChatResultCode result;
+    std::vector<FriendStatus> friends;
+
+    std::tie(result, friends) = node_->GetContactService()->GetFriendStatus(request.srcAvatarId, request.srcAddress);
+
+    Send(ResFriendStatus{request.track, result, friends});
+}
+
+void GatewayClient::HandleAddIgnore(const ReqAddIgnore & request) {
+    ChatResultCode result = node_->GetContactService()->AddIgnore(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress);
+
+    Send(ResAddIgnore{request.track, result});
+}
+
+void GatewayClient::HandleRemoveIgnore(const ReqRemoveIgnore & request) {
+    ChatResultCode result = node_->GetContactService()->RemoveIgnore(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress);
+
+    Send(ResRemoveIgnore{request.track, result});
 }
 
 void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
@@ -214,6 +266,15 @@ void GatewayClient::HandleUpdatePersistentMessage(const ReqUpdatePersistentMessa
         request.srcAvatarId, request.messageId, request.status);
 
     Send(ResUpdatePersistentMessage{request.track, ChatResultCode::SUCCESS});
+}
+
+void GatewayClient::HandleIgnoreStatus(const ReqIgnoreStatus & request) {
+    ChatResultCode result;
+    std::vector<IgnoreStatus> ignored;
+
+    std::tie(result, ignored) = node_->GetContactService()->GetIgnoreStatus(request.srcAvatarId, request.srcAddress);
+
+    Send(ResIgnoreStatus{request.track, result, ignored});
 }
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {

@@ -30,3 +30,11 @@ CREATE TABLE persistent_message (id INTEGER PRIMARY KEY,
                                  category TEXT,
                                  message TEXT,
                                  oob TEXT);
+
+CREATE TABLE friend (id INTEGER PRIMARY KEY,
+                     avatar_id INTEGER,
+                     friend_avatar_id INTEGER);
+
+CREATE TABLE ignore (id INTEGER PRIMARY KEY,
+                     avatar_id INTEGER,
+                     ignore_avatar_id INTEGER);

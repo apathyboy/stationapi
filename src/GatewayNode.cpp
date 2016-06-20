@@ -19,7 +19,7 @@ GatewayNode::GatewayNode(SwgChatConfig& config)
     avatarService_ = std::make_unique<ChatAvatarService>(db_);
     roomService_ = std::make_unique<ChatRoomService>(db_);
     messageService_ = std::make_unique<PersistentMessageService>(db_);
-    contactService_ = std::make_unique<ContactService>(db_);
+    contactService_ = std::make_unique<ContactService>(avatarService_.get(), db_);
 }
 
 GatewayNode::~GatewayNode() { sqlite3_close(db_); }
