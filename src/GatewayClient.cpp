@@ -5,6 +5,7 @@
 #include "ChatRoomService.hpp"
 #include "ContactService.hpp"
 #include "GatewayNode.hpp"
+#include "Message.hpp"
 #include "PersistentMessageService.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
@@ -243,6 +244,10 @@ void GatewayClient::HandleSendPersistentMessage(const ReqSendPersistentMessage& 
     }
 
     Send(ResSendPeristentMessage{request.track, result, message.header.messageId});
+
+    if (destAvatar) {
+        Send(MPersistentMessage{destAvatar->avatarId, message.header});
+    }
 }
 
 void GatewayClient::HandleGetPersistentHeaders(const ReqGetPersistentHeaders& request) {
