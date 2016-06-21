@@ -151,6 +151,106 @@ void read(StreamT& ar, ReqCreateRoom& data) {
     read(ar, data.srcAddress);
 }
 
+/** Begin ADDFRIEND */
+
+struct ReqAddFriend {
+    const ChatRequestType type = ChatRequestType::ADDFRIEND;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring destName;
+    std::wstring destAddress;
+    std::wstring comment;
+    bool confirm;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqAddFriend& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.destName);
+    read(ar, data.destAddress);
+    read(ar, data.comment);
+    read(ar, data.confirm);
+    read(ar, data.srcAddress);
+}
+
+/** Begin REMOVEFRIEND */
+
+struct ReqRemoveFriend {
+    const ChatRequestType type = ChatRequestType::REMOVEFRIEND;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring destName;
+    std::wstring destAddress;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqRemoveFriend& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.destName);
+    read(ar, data.destAddress);
+    read(ar, data.srcAddress);
+}
+
+/** Begin FRIENDSTATUS */
+
+struct ReqFriendStatus {
+    const ChatRequestType type = ChatRequestType::FRIENDSTATUS;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqFriendStatus& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.srcAddress);
+}
+
+/** Begin ADDIGNORE */
+
+struct ReqAddIgnore {
+    const ChatRequestType type = ChatRequestType::ADDIGNORE;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring destName;
+    std::wstring destAddress;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqAddIgnore& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.destName);
+    read(ar, data.destAddress);
+    read(ar, data.srcAddress);
+}
+
+/** Begin REMOVEIGNORE */
+
+struct ReqRemoveIgnore {
+    const ChatRequestType type = ChatRequestType::REMOVEIGNORE;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring destName;
+    std::wstring destAddress;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqRemoveIgnore& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.destName);
+    read(ar, data.destAddress);
+    read(ar, data.srcAddress);
+}
+
 /** Begin ENTERROOM */
 
 struct ReqEnterRoom {
@@ -302,6 +402,22 @@ void read(StreamT& ar, ReqUpdatePersistentMessage& data) {
     read(ar, data.srcAvatarId);
     read(ar, data.messageId);
     read(ar, data.status);
+}
+
+/** Begin IGNORESTATUS */
+
+struct ReqIgnoreStatus {
+    const ChatRequestType type = ChatRequestType::IGNORESTATUS;
+    uint32_t track;
+    uint32_t srcAvatarId;
+    std::wstring srcAddress;
+};
+
+template <typename StreamT>
+void read(StreamT& ar, ReqIgnoreStatus& data) {
+    read(ar, data.track);
+    read(ar, data.srcAvatarId);
+    read(ar, data.srcAddress);
 }
 
 /** Begin SETAPIVERSION */
