@@ -129,10 +129,22 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
 }
 
 void GatewayClient::HandleLogoutAvatar(const ReqLogoutAvatar& request) {
-    node_->GetAvatarService()->LogoutAvatar(request.avatarId);
-    node_->GetRoomService()->LogoutFromAllRooms(request.avatarId);
+    auto as = node_->GetAvatarService();
+    auto rs = node_->GetRoomService();
+
+    auto avatar = as->GetAvatar(request.avatarId);
+
+    as->LogoutAvatar(request.avatarId);
+    rs->LogoutFromAllRooms(request.avatarId);
 
     Send(ResLogoutAvatar{request.track, ChatResultCode::SUCCESS});
+
+    auto& onlineAvatars = as->GetOnlineAvatars();
+    for (auto onlineAvatar : onlineAvatars) {
+        if (onlineAvatar->IsFriend(avatar)) {
+            Send(MFriendLogout{avatar, avatar->GetAddress(), onlineAvatar->GetAvatarId()});
+        }
+    }
 }
 
 void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {

@@ -92,6 +92,30 @@ void write(StreamT& ar, const MFriendLogin& data) {
     write(ar, data.friendStatus);
 }
 
+/** Begin FRIENDLOGOUT */
+
+struct MFriendLogout {
+    MFriendLogout(const ChatAvatar* avatar_, const std::wstring& friendAddress_, uint32_t destAvatarId_)
+        : avatar{avatar_}
+        , friendAddress{friendAddress_}
+        , destAvatarId{destAvatarId_} {}
+
+    const ChatMessageType type = ChatMessageType::FRIENDLOGOUT;
+    const uint32_t track = 0;
+    const ChatAvatar* avatar;
+    uint32_t destAvatarId;
+    std::wstring friendAddress;
+};
+
+template <typename StreamT>
+void write(StreamT& ar, const MFriendLogout& data) {
+    write(ar, data.type);
+    write(ar, data.track);
+    write(ar, data.avatar);
+    write(ar, data.friendAddress);
+    write(ar, data.destAvatarId);
+}
+
 /** Begin PERSISTENTMESSAGE */
 
 struct MPersistentMessage {
