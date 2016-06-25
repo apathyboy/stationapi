@@ -21,18 +21,18 @@ ChatResultCode ChatRoom::EnterRoom(ChatAvatar* avatar, const std::wstring& passw
 }
 
 bool ChatRoom::IsInRoom(ChatAvatar* avatar) const {
-    return IsInRoom(avatar->avatarId);
+    return IsInRoom(avatar->GetAvatarId());
 }
 
 bool ChatRoom::IsInRoom(uint32_t avatarId) const {
     return std::find_if(std::begin(avatars_), std::end(avatars_), [avatarId](ChatAvatar* roomAvatar) {
-        return roomAvatar->avatarId == avatarId;
+        return roomAvatar->GetAvatarId() == avatarId;
     }) != std::end(avatars_);
 }
 
 void ChatRoom::ExitRoom(uint32_t avatarId) {
     auto avatarsIter = std::remove_if(std::begin(avatars_), std::end(avatars_), [avatarId](auto avatar) {
-        return avatar->avatarId == avatarId;
+        return avatar->GetAvatarId() == avatarId;
     });
 
     if (avatarsIter != std::end(avatars_)) {
@@ -40,7 +40,7 @@ void ChatRoom::ExitRoom(uint32_t avatarId) {
     }
 
     auto administratorsIter = std::remove_if(std::begin(administrators_), std::end(administrators_), [avatarId](auto avatar) {
-        return avatar->avatarId == avatarId;
+        return avatar->GetAvatarId() == avatarId;
     });
 
     if (administratorsIter != std::end(administrators_)) {
@@ -48,7 +48,7 @@ void ChatRoom::ExitRoom(uint32_t avatarId) {
     }
 
     auto moderatorsIter = std::remove_if(std::begin(moderators_), std::end(moderators_), [avatarId](auto avatar) {
-        return avatar->avatarId == avatarId;
+        return avatar->GetAvatarId() == avatarId;
     });
 
     if (moderatorsIter != std::end(moderators_)) {
@@ -56,7 +56,7 @@ void ChatRoom::ExitRoom(uint32_t avatarId) {
     }
 
     auto tempModeratorsIter = std::remove_if(std::begin(tempModerators_), std::end(tempModerators_), [avatarId](auto avatar) {
-        return avatar->avatarId == avatarId;
+        return avatar->GetAvatarId() == avatarId;
     });
 
     if (tempModeratorsIter != std::end(tempModerators_)) {

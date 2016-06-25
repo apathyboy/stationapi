@@ -95,7 +95,7 @@ enum class ChatResponseType : uint16_t {
 /** Begin LOGINAVATAR */
 
 struct ResLoginAvatar {
-    ResLoginAvatar(uint32_t track_, ChatResultCode result_, boost::optional<ChatAvatar>& avatar_)
+    ResLoginAvatar(uint32_t track_, ChatResultCode result_, const ChatAvatar* const avatar_)
         : track{track_}
         , result{result_}
         , avatar{avatar_} {}
@@ -103,7 +103,7 @@ struct ResLoginAvatar {
     const ChatResponseType type = ChatResponseType::LOGINAVATAR;
     uint32_t track;
     ChatResultCode result;
-    const boost::optional<ChatAvatar>& avatar;
+    const ChatAvatar* const avatar;
 };
 
 template <typename StreamT>
@@ -113,7 +113,7 @@ void write(StreamT& ar, const ResLoginAvatar& data) {
     write(ar, data.result);
 
     if (data.result == ChatResultCode::SUCCESS) {
-        write(ar, data.avatar.get());
+        write(ar, data.avatar);
     }
 }
 
@@ -208,7 +208,7 @@ void write(StreamT& ar, const ResRemoveFriend& data) {
 /** Begin FRIENDSTATUS */
 
 struct ResFriendStatus {
-    ResFriendStatus(uint32_t track_, ChatResultCode result_, std::vector<FriendStatus> friends_)
+    ResFriendStatus(uint32_t track_, ChatResultCode result_, const std::vector<FriendContact>& friends_)
         : track{track_}
         , result{result_}
         , friends{friends_} {}
@@ -216,7 +216,7 @@ struct ResFriendStatus {
     const ChatResponseType type = ChatResponseType::FRIENDSTATUS;
     uint32_t track;
     ChatResultCode result;
-    std::vector<FriendStatus> friends;
+    const std::vector<FriendContact>& friends;
 };
 
 template <typename StreamT>
@@ -227,8 +227,8 @@ void write(StreamT& ar, const ResFriendStatus& data) {
 
     write(ar, static_cast<uint32_t>(data.friends.size()));
 
-    for (auto& friendState : data.friends) {
-        write(ar, friendState);
+    for (auto& friendContact : data.friends) {
+        write(ar, friendContact);
     }
 }
 
@@ -475,7 +475,7 @@ void write(StreamT& ar, const ResUpdatePersistentMessage& data) {
 /** Begin IGNORESTATUS */
 
 struct ResIgnoreStatus {
-    ResIgnoreStatus(uint32_t track_, ChatResultCode result_, std::vector<IgnoreStatus> ignore_)
+    ResIgnoreStatus(uint32_t track_, ChatResultCode result_, const std::vector<IgnoreContact>& ignore_)
         : track{track_}
         , result{result_}
         , ignore{ignore_} {}
@@ -483,7 +483,7 @@ struct ResIgnoreStatus {
     const ChatResponseType type = ChatResponseType::IGNORESTATUS;
     uint32_t track;
     ChatResultCode result;
-    std::vector<IgnoreStatus> ignore;
+    const std::vector<IgnoreContact>& ignore;
 };
 
 template <typename StreamT>
@@ -493,8 +493,8 @@ void write(StreamT& ar, const ResIgnoreStatus& data) {
     write(ar, data.result);
     
     write(ar, static_cast<uint32_t>(data.ignore.size()));
-    for (auto& ignoreStatus : data.ignore) {
-        write(ar, ignoreStatus);
+    for (auto& ignoreContact : data.ignore) {
+        write(ar, ignoreContact);
     }
 }
 
@@ -523,7 +523,7 @@ void write(StreamT& ar, const ResSetApiVersion& data) {
 /** Begin SETAVATARATTRIBUTES */
 
 struct ResSetAvatarAttributes {
-    ResSetAvatarAttributes(uint32_t track_, ChatResultCode result_, ChatAvatar* avatar_)
+    ResSetAvatarAttributes(uint32_t track_, ChatResultCode result_, const ChatAvatar* avatar_)
         : track{track_}
         , result{result_}
         , avatar{avatar_} {}
@@ -531,7 +531,7 @@ struct ResSetAvatarAttributes {
     const ChatResponseType type = ChatResponseType::SETAVATARATTRIBUTES;
     uint32_t track;
     ChatResultCode result;
-    ChatAvatar* avatar;
+    const ChatAvatar* avatar;
 };
 
 template <typename StreamT>
@@ -541,7 +541,7 @@ void write(StreamT& ar, const ResSetAvatarAttributes& data) {
     write(ar, data.result);
 
     if (data.result == ChatResultCode::SUCCESS) {
-        write(ar, *data.avatar);
+        write(ar, data.avatar);
     }
 }
 
@@ -549,7 +549,7 @@ void write(StreamT& ar, const ResSetAvatarAttributes& data) {
 
 struct ResGetAnyAvatar {
     ResGetAnyAvatar(uint32_t track_, ChatResultCode result_, bool isOnline_,
-        boost::optional<ChatAvatar>& avatar_)
+                    const ChatAvatar* avatar_)
         : track{track_}
         , result{result_}
         , isOnline{isOnline_}
@@ -559,7 +559,7 @@ struct ResGetAnyAvatar {
     uint32_t track;
     ChatResultCode result;
     bool isOnline;
-    boost::optional<ChatAvatar>& avatar;
+    const ChatAvatar* avatar;
 };
 
 template <typename StreamT>
@@ -570,7 +570,7 @@ void write(StreamT& ar, const ResGetAnyAvatar& data) {
     write(ar, data.isOnline);
 
     if (data.result == ChatResultCode::SUCCESS) {
-        write(ar, data.avatar.get());
+        write(ar, data.avatar);
     }
 }
 

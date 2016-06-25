@@ -6,6 +6,7 @@ include_directories(
 
 add_executable(swgchat
     BinaryStream.hpp
+    ChatAvatar.cpp
     ChatAvatar.hpp
     ChatAvatarService.cpp
     ChatAvatarService.hpp
@@ -15,8 +16,6 @@ add_executable(swgchat
     ChatRoomService.cpp
     ChatRoomService.hpp
     Contact.hpp
-    ContactService.cpp
-    ContactService.hpp
     GatewayClient.cpp
     GatewayClient.hpp
     GatewayNode.cpp
@@ -35,6 +34,7 @@ add_executable(swgchat
     Request.hpp
     Response.hpp
     Serialization.hpp
+    SQLite3.hpp
     StreamUtils.cpp
     StreamUtils.hpp
     StringUtils.cpp

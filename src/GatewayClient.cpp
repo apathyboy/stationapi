@@ -3,12 +3,12 @@
 
 #include "ChatAvatarService.hpp"
 #include "ChatRoomService.hpp"
-#include "ContactService.hpp"
 #include "GatewayNode.hpp"
 #include "Message.hpp"
 #include "PersistentMessageService.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "SQLite3.hpp"
 #include "SwgChatConfig.hpp"
 #include "UdpLibrary.hpp"
 
@@ -92,27 +92,22 @@ void GatewayClient::OnIncoming(BinarySourceStream& istream) {
 }
 
 void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
-    auto avatarService = node_->GetAvatarService();
+    auto as = node_->GetAvatarService();
 
-    ChatResultCode result = ChatResultCode::SUCCESS;
-    boost::optional<ChatAvatar> avatar;
+    ChatResultCode result{ChatResultCode::SUCCESS};
+    ChatAvatar* avatar{nullptr};
 
-    // Check to see if this avatar is already logged in.
-    if (avatarService->IsAvatarOnline(request.name, request.address)) {
-        result = ChatResultCode::DUPLICATELOGIN;
-    } else {
-        // If the avatar already exists grab it from persistent storage.
-        std::tie(result, avatar) = avatarService->GetPersistedAvatar(request.name, request.address);
-        if (result != ChatResultCode::SUCCESS) {
-            // Otherwise, create a new avatar.
-            std::tie(result, avatar) = avatarService->CreateAvatar(request.name, request.address,
-                request.userId, request.loginAttributes, request.loginLocation);
+    try {
+        avatar = as->GetAvatar(request.name, request.address);
+        if (!avatar) {
+            avatar = as->CreateAvatar(request.name, request.address, request.userId,
+                request.loginAttributes, request.loginLocation);
         }
 
-        // Log in the avatar if it was successfully created or loaded from storage
-        if (result == ChatResultCode::SUCCESS) {
-            result = avatarService->LoginAvatar(avatar.get());
-        }
+        as->LoginAvatar(CHECK_NOTNULL(avatar));
+    } catch (const SQLite3Exception& e) {
+        result = ChatResultCode::DBFAIL;
+        LOG(ERROR) << e.message;
     }
 
     Send(ResLoginAvatar{request.track, result, avatar});
@@ -132,45 +127,71 @@ void GatewayClient::HandleCreateRoom(const ReqCreateRoom& request) {
     ChatResultCode result;
     ChatRoom* room;
 
-    auto avatar = as->GetOnlineAvatar(request.creatorId);
+    auto avatar = as->GetAvatar(request.creatorId);
     if (avatar) {
-        std::tie(result, room) = rs->CreateRoom(avatar->avatarId, avatar->name, avatar->address,
-            request.roomName, request.roomTopic, request.roomPassword, request.roomAttributes,
-            request.roomMaxSize, request.roomAddress, request.srcAddress);
+        std::tie(result, room) = rs->CreateRoom(avatar->GetAvatarId(), avatar->GetName(),
+            avatar->GetAddress(), request.roomName, request.roomTopic, request.roomPassword,
+            request.roomAttributes, request.roomMaxSize, request.roomAddress, request.srcAddress);
     }
 
     Send(ResCreateRoom{request.track, result, room});
 }
 
-void GatewayClient::HandleAddFriend(const ReqAddFriend & request) {
-    ChatResultCode result = node_->GetContactService()->AddFriend(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress, request.comment);
+void GatewayClient::HandleAddFriend(const ReqAddFriend& request) {
+    ChatResultCode result{ChatResultCode::SUCCESS};
+    auto as = node_->GetAvatarService();
+
+    auto srcAvatar = as->GetAvatar(request.srcAvatarId);
+    auto destAvatar = as->GetAvatar(request.destName, request.destAddress);
+
+    srcAvatar->AddFriend(destAvatar);
 
     Send(ResAddFriend{request.track, result});
 }
 
-void GatewayClient::HandleRemoveFriend(const ReqRemoveFriend & request) {
-    ChatResultCode result = node_->GetContactService()->RemoveFriend(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress);
+void GatewayClient::HandleRemoveFriend(const ReqRemoveFriend& request) {
+    ChatResultCode result{ChatResultCode::SUCCESS};
+    auto as = node_->GetAvatarService();
+
+    auto srcAvatar = as->GetAvatar(request.srcAvatarId);
+    auto destAvatar = as->GetAvatar(request.destName, request.destAddress);
+
+    srcAvatar->RemoveFriend(destAvatar);
 
     Send(ResRemoveFriend{request.track, result});
 }
 
-void GatewayClient::HandleFriendStatus(const ReqFriendStatus & request) {
-    ChatResultCode result;
-    std::vector<FriendStatus> friends;
+void GatewayClient::HandleFriendStatus(const ReqFriendStatus& request) {
+    ChatResultCode result{ChatResultCode::SUCCESS};
+    auto as = node_->GetAvatarService();
 
-    std::tie(result, friends) = node_->GetContactService()->GetFriendStatus(request.srcAvatarId, request.srcAddress);
+    auto avatar = as->GetAvatar(request.srcAvatarId);
 
-    Send(ResFriendStatus{request.track, result, friends});
+    CHECK_NOTNULL(avatar);
+    
+    Send(ResFriendStatus{request.track, result, avatar->GetFriendList()});
 }
 
-void GatewayClient::HandleAddIgnore(const ReqAddIgnore & request) {
-    ChatResultCode result = node_->GetContactService()->AddIgnore(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress);
+void GatewayClient::HandleAddIgnore(const ReqAddIgnore& request) {
+    ChatResultCode result{ChatResultCode::SUCCESS};
+    auto as = node_->GetAvatarService();
+
+    auto srcAvatar = as->GetAvatar(request.srcAvatarId);
+    auto destAvatar = as->GetAvatar(request.destName, request.destAddress);
+
+    srcAvatar->AddIgnore(destAvatar);
 
     Send(ResAddIgnore{request.track, result});
 }
 
-void GatewayClient::HandleRemoveIgnore(const ReqRemoveIgnore & request) {
-    ChatResultCode result = node_->GetContactService()->RemoveIgnore(request.srcAvatarId, request.srcAddress, request.destName, request.destAddress);
+void GatewayClient::HandleRemoveIgnore(const ReqRemoveIgnore& request) {
+    ChatResultCode result{ChatResultCode::SUCCESS};
+    auto as = node_->GetAvatarService();
+
+    auto srcAvatar = as->GetAvatar(request.srcAvatarId);
+    auto destAvatar = as->GetAvatar(request.destName, request.destAddress);
+
+    srcAvatar->RemoveIgnore(destAvatar);
 
     Send(ResRemoveIgnore{request.track, result});
 }
@@ -181,7 +202,7 @@ void GatewayClient::HandleEnterRoom(const ReqEnterRoom& request) {
     ChatResultCode result = ChatResultCode::SUCCESS;
     ChatRoom* room{nullptr};
 
-    auto avatar = as->GetOnlineAvatar(request.srcAvatarId);
+    auto avatar = as->GetAvatar(request.srcAvatarId);
     if (!avatar) {
         result = ChatResultCode::SRCAVATARDOESNTEXIST;
     } else {
@@ -216,25 +237,23 @@ void GatewayClient::HandleSendPersistentMessage(const ReqSendPersistentMessage& 
 
     auto avatarService = node_->GetAvatarService();
     auto messageService = node_->GetMessageService();
-    
+
     PersistentMessage message;
 
-    boost::optional<ChatAvatar> destAvatar;
-
-    std::tie(result, destAvatar) = avatarService->GetAvatar(request.destName, request.destAddress);
+    auto destAvatar = avatarService->GetAvatar(request.destName, request.destAddress);
 
     if (destAvatar) {
         if (request.avatarPresence) {
-            auto avatar = avatarService->GetOnlineAvatar(request.srcAvatarId);
+            auto srcAvatar = avatarService->GetAvatar(request.srcAvatarId);
 
-            message.header.fromName = avatar->name;
-            message.header.fromAddress = avatar->address;
+            message.header.fromName = srcAvatar->GetName();
+            message.header.fromAddress = srcAvatar->GetAddress();
         } else {
             message.header.fromName = request.srcName;
         }
 
         message.header.sentTime = static_cast<uint32_t>(std::time(nullptr));
-        message.header.avatarId = destAvatar->avatarId;
+        message.header.avatarId = destAvatar->GetAvatarId();
         message.header.subject = request.subject;
         message.header.category = request.category;
         message.message = request.msg;
@@ -246,7 +265,7 @@ void GatewayClient::HandleSendPersistentMessage(const ReqSendPersistentMessage& 
     Send(ResSendPeristentMessage{request.track, result, message.header.messageId});
 
     if (destAvatar) {
-        Send(MPersistentMessage{destAvatar->avatarId, message.header});
+        Send(MPersistentMessage{destAvatar->GetAvatarId(), message.header});
     }
 }
 
@@ -273,13 +292,15 @@ void GatewayClient::HandleUpdatePersistentMessage(const ReqUpdatePersistentMessa
     Send(ResUpdatePersistentMessage{request.track, ChatResultCode::SUCCESS});
 }
 
-void GatewayClient::HandleIgnoreStatus(const ReqIgnoreStatus & request) {
-    ChatResultCode result;
-    std::vector<IgnoreStatus> ignored;
+void GatewayClient::HandleIgnoreStatus(const ReqIgnoreStatus& request) {
+    ChatResultCode result{ChatResultCode::SUCCESS};
+    auto as = node_->GetAvatarService();
 
-    std::tie(result, ignored) = node_->GetContactService()->GetIgnoreStatus(request.srcAvatarId, request.srcAddress);
+    auto avatar = as->GetAvatar(request.srcAvatarId);
 
-    Send(ResIgnoreStatus{request.track, result, ignored});
+    CHECK_NOTNULL(avatar);
+
+    Send(ResIgnoreStatus{request.track, result, avatar->GetIgnoreList()});
 }
 
 void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
@@ -288,25 +309,24 @@ void GatewayClient::HandleSetApiVersion(const ReqSetApiVersion& request) {
         ? ChatResultCode::SUCCESS
         : ChatResultCode::WRONGCHATSERVERFORREQUEST;
 
-    node_->GetAvatarService()->ClearOnlineAvatars();
+    // node_->GetAvatarService()->ClearOnlineAvatars();
     node_->GetRoomService()->LoadRoomsFromStorage();
 
     Send(ResSetApiVersion{request.track, result, version});
 }
 
 void GatewayClient::HandleSetAvatarAttributes(const ReqSetAvatarAttributes& request) {
-    auto avatarService = node_->GetAvatarService();
+    auto as = node_->GetAvatarService();
 
     ChatResultCode result = ChatResultCode::SUCCESS;
-    ChatAvatar* avatar = avatarService->GetOnlineAvatar(request.avatarId);
+    ChatAvatar* avatar = as->GetAvatar(request.avatarId);
 
     if (avatar) {
-        if (avatar->attributes != request.avatarAttributes) {
-            avatar->attributes = request.avatarAttributes;
+        if (avatar->GetAttributes() != request.avatarAttributes) {
+            avatar->SetAttributes(request.avatarAttributes);
 
-            if (request.persistent != 0) {
-                avatarService->PersistAvatar(*avatar);
-            }
+            if (request.persistent != 0)
+                as->PersistAvatar(avatar);
         }
     } else {
         result = ChatResultCode::SRCAVATARDOESNTEXIST;
@@ -316,13 +336,15 @@ void GatewayClient::HandleSetAvatarAttributes(const ReqSetAvatarAttributes& requ
 }
 
 void GatewayClient::HandleGetAnyAvatar(const ReqGetAnyAvatar& request) {
-    auto avatarService = node_->GetAvatarService();
+    auto as = node_->GetAvatarService();
 
-    ChatResultCode result;
-    boost::optional<ChatAvatar> avatar;
+    ChatResultCode result = ChatResultCode::SUCCESS;
 
-    std::tie(result, avatar) = avatarService->GetAvatar(request.name, request.address);
-    bool isOnline = (avatar) ? avatar->isOnline : false;
+    auto avatar = as->GetAvatar(request.name, request.address);
 
-    Send(ResGetAnyAvatar{request.track, result, isOnline, avatar});
+    if (!avatar) {
+        result = ChatResultCode::SRCAVATARDOESNTEXIST;
+    }
+
+    Send(ResGetAnyAvatar{request.track, result, avatar->IsOnline(), avatar});
 }

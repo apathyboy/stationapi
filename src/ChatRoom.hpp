@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-struct ChatAvatar;
+class ChatAvatar;
 
 class ChatRoom {
 public:
@@ -101,35 +101,35 @@ void write(StreamT& ar, const ChatRoom& data) {
     auto& avatars = data.GetAvatars();
     write(ar, static_cast<uint32_t>(avatars.size()));
     for (auto& avatar : avatars)
-        write(ar, *avatar);
+        write(ar, avatar);
 
     auto& administrators = data.GetAdminstrators();
     write(ar, static_cast<uint32_t>(administrators.size()));
     for (auto& avatar : administrators)
-        write(ar, *avatar);
+        write(ar, avatar);
 
     auto& moderators = data.GetModerators();
     write(ar, static_cast<uint32_t>(moderators.size()));
     for (auto& avatar : moderators)
-        write(ar, *avatar);
+        write(ar, avatar);
 
     auto& tempModerators = data.GetTempModerators();
     write(ar, static_cast<uint32_t>(tempModerators.size()));
     for (auto& avatar : tempModerators)
-        write(ar, *avatar);
+        write(ar, avatar);
 
     auto& banned = data.GetBanned();
     write(ar, static_cast<uint32_t>(banned.size()));
     for (auto& avatar : banned)
-        write(ar, *avatar);
+        write(ar, avatar);
 
     auto& invited = data.GetInvited();
     write(ar, static_cast<uint32_t>(invited.size()));
     for (auto& avatar : invited)
-        write(ar, *avatar);
+        write(ar, avatar);
 
     auto& voice = data.GetVoice();
     write(ar, static_cast<uint32_t>(voice.size()));
     for (auto& avatar : voice)
-        write(ar, *avatar);
+        write(ar, avatar);
 }

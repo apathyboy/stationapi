@@ -1,30 +1,38 @@
 
 #pragma once
 
+#include "Serialization.hpp"
+
 #include <string>
 
-struct FriendStatus {
-    std::wstring name;
-    std::wstring address;
-    std::wstring commment = L"";
-    uint16_t status;
+class ChatAvatar;
+
+struct FriendContact {
+    FriendContact(const ChatAvatar* frnd_, const std::wstring& comment_)
+        : frnd{frnd_}
+        , comment{comment_} {}
+
+    const ChatAvatar* frnd;
+    std::wstring comment = L"";
 };
 
 template <typename StreamT>
-void write(StreamT& ar, const FriendStatus& data) {
-    write(ar, data.name);
-    write(ar, data.address);
-    write(ar, data.commment);
-    write(ar, data.status);
+void write(StreamT& ar, const FriendContact& data) {
+    write(ar, data.frnd->GetName());
+    write(ar, data.frnd->GetAddress());
+    write(ar, data.comment);
+    write(ar, data.frnd->IsOnline() ? 1 : 0);
 }
 
-struct IgnoreStatus {
-    std::wstring name;
-    std::wstring address;
+struct IgnoreContact {
+    IgnoreContact(const ChatAvatar* ignored_)
+        : ignored{ignored_} {}
+
+    const ChatAvatar* ignored;
 };
 
 template <typename StreamT>
-void write(StreamT& ar, const IgnoreStatus& data) {
-    write(ar, data.name);
-    write(ar, data.address);
+void write(StreamT& ar, const IgnoreContact& data) {
+    write(ar, data.ignored->GetName());
+    write(ar, data.ignored->GetAddress());
 }

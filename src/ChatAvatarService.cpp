@@ -1,206 +1,429 @@
 #include "ChatAvatarService.hpp"
 #include "ChatAvatar.hpp"
+#include "SQLite3.hpp"
 #include "StringUtils.hpp"
 
-#include <sqlite3.h>
+#include <easylogging++.h>
 
 ChatAvatarService::ChatAvatarService(sqlite3* db)
     : db_{db} {}
 
 ChatAvatarService::~ChatAvatarService() {}
 
-void ChatAvatarService::ClearOnlineAvatars() {
-    onlineAvatars_.clear();
-}
+ChatAvatar* ChatAvatarService::GetAvatar(const std::wstring& name, const std::wstring& address) {
+    ChatAvatar* avatar = GetCachedAvatar(name, address);
 
-std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetAvatar(
-    const std::wstring& name, const std::wstring& address) {
-    ChatResultCode result = ChatResultCode::SUCCESS;
-    boost::optional<ChatAvatar> avatar;
-
-    std::tie(result, avatar) = GetOnlineAvatar(name, address);
-
-    if (result != ChatResultCode::SUCCESS) {
-        std::tie(result, avatar) = GetPersistedAvatar(name, address);
-    }
-
-    return std::make_pair(result, avatar);
-}
-
-ChatAvatar* ChatAvatarService::GetOnlineAvatar(
-    uint32_t avatarId) {
-    ChatAvatar* avatar;
-
-    auto find_iter = std::find_if(std::begin(onlineAvatars_), std::end(onlineAvatars_),
-        [avatarId](auto& avatar) { return avatar.second.avatarId == avatarId; });
-    if (find_iter != std::end(onlineAvatars_)) {
-        avatar = &find_iter->second;
+    if (!avatar) {
+        auto loadedAvatar = LoadStoredAvatar(name, address);
+        if (loadedAvatar != nullptr) {
+            avatar = loadedAvatar.get();
+            avatarCache_.emplace_back(std::move(loadedAvatar));
+        }
     }
 
     return avatar;
 }
 
-bool ChatAvatarService::IsAvatarOnline(const std::wstring& name, const std::wstring& address) {
-    return onlineAvatars_.find(name + L"+" + address) != std::end(onlineAvatars_);
-}
+ChatAvatar* ChatAvatarService::GetAvatar(uint32_t avatarId) {
+    ChatAvatar* avatar = GetCachedAvatar(avatarId);
 
-std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetOnlineAvatar(
-    const std::wstring& name, const std::wstring& address) {
-    ChatResultCode result = ChatResultCode::SUCCESS;
-    boost::optional<ChatAvatar> avatar;
-
-    auto find_iter = onlineAvatars_.find(name + L"+" + address);
-    if (find_iter != std::end(onlineAvatars_)) {
-        avatar = find_iter->second;
-    } else {
-        result = ChatResultCode::DESTAVATARDOESNTEXIST;
+    if (!avatar) {
+        auto loadedAvatar = LoadStoredAvatar(avatarId);
+        if (loadedAvatar != nullptr) {
+            avatar = loadedAvatar.get();
+            avatarCache_.emplace_back(std::move(loadedAvatar));
+        }
     }
 
-    return std::make_pair(result, avatar);
+    return avatar;
 }
 
-std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::GetPersistedAvatar(
+ChatAvatar* ChatAvatarService::CreateAvatar(const std::wstring& name, const std::wstring& address,
+    uint32_t userId, uint32_t loginAttributes, const std::wstring& loginLocation) {
+    auto tmp = std::make_unique<ChatAvatar>(this, name, address, userId, loginAttributes, loginLocation);
+    auto avatar = tmp.get();
+
+    InsertAvatar(avatar);
+
+    avatarCache_.emplace_back(std::move(tmp));
+
+    return avatar;
+}
+
+void ChatAvatarService::LoginAvatar(ChatAvatar* avatar) { avatar->isOnline_ = true; }
+
+void ChatAvatarService::LogoutAvatar(uint32_t avatarId) {
+    auto avatar = GetAvatar(avatarId);
+    avatar->isOnline_ = false;
+}
+
+void ChatAvatarService::PersistAvatar(const ChatAvatar* avatar) { 
+    UpdateAvatar(avatar);
+}
+
+void ChatAvatarService::PersistFriend(uint32_t srcAvatarId, uint32_t destAvatarId, const std::wstring & comment) {
+    sqlite3_stmt* stmt;
+    char sql[] = "INSERT INTO friend (avatar_id, friend_avatar_id, comment) VALUES (@avatar_id, @friend_avatar_id, @comment)";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+    int friendAvatarIdIdx = sqlite3_bind_parameter_index(stmt, "@friend_avatar_id");
+    int commentIdx = sqlite3_bind_parameter_index(stmt, "@comment");
+
+    std::string commentStr = FromWideString(comment);
+
+    sqlite3_bind_int(stmt, avatarIdIdx, srcAvatarId);
+    sqlite3_bind_int(stmt, friendAvatarIdIdx, destAvatarId);
+    sqlite3_bind_text(stmt, commentIdx, commentStr.c_str(), -1, 0);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+}
+
+void ChatAvatarService::PersistIgnore(uint32_t srcAvatarId, uint32_t destAvatarId) {
+    sqlite3_stmt* stmt;
+    char sql[] = "INSERT INTO ignore (avatar_id, ignore_avatar_id, comment) VALUES (@avatar_id, @ignore_avatar_id)";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+    int ignoreAvatarIdIdx = sqlite3_bind_parameter_index(stmt, "@ignore_avatar_id");
+    
+    sqlite3_bind_int(stmt, avatarIdIdx, srcAvatarId);
+    sqlite3_bind_int(stmt, ignoreAvatarIdIdx, destAvatarId);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+}
+
+void ChatAvatarService::RemoveFriend(uint32_t srcAvatarId, uint32_t destAvatarId) {
+    sqlite3_stmt* stmt;
+
+    char sql[] = "DELETE FROM friend WHERE avatar_id = @avatar_id AND friend_avatar_id = @friend_avatar_id";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+    int friendAvatarIdIdx = sqlite3_bind_parameter_index(stmt, "@friend_avatar_id");
+
+    sqlite3_bind_int(stmt, avatarIdIdx, srcAvatarId);
+    sqlite3_bind_int(stmt, friendAvatarIdIdx, destAvatarId);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+}
+
+void ChatAvatarService::RemoveIgnore(uint32_t srcAvatarId, uint32_t destAvatarId) {
+    sqlite3_stmt* stmt;
+
+    char sql[] = "DELETE FROM ignore WHERE avatar_id = @avatar_id AND ignore_avatar_id = @ignore_avatar_id";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+    int ignoreAvatarIdIdx = sqlite3_bind_parameter_index(stmt, "@ignore_avatar_id");
+
+    sqlite3_bind_int(stmt, avatarIdIdx, srcAvatarId);
+    sqlite3_bind_int(stmt, ignoreAvatarIdIdx, destAvatarId);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+}
+
+void ChatAvatarService::UpdateFriendComment(uint32_t srcAvatarId, uint32_t destAvatarId, const std::wstring & comment) {
+    sqlite3_stmt* stmt;
+    char sql[] = "UDPATE friend SET comment = @comment WHERE avatar_id = @avatar_id AND friend_avatar_id = @friend_avatar_id";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int commentIdx = sqlite3_bind_parameter_index(stmt, "@comment");
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+    int friendAvatarIdIdx = sqlite3_bind_parameter_index(stmt, "@friend_avatar_id");
+
+    std::string commentStr = FromWideString(comment);
+
+    sqlite3_bind_text(stmt, commentIdx, commentStr.c_str(), -1, 0);
+    sqlite3_bind_int(stmt, avatarIdIdx, srcAvatarId);
+    sqlite3_bind_int(stmt, friendAvatarIdIdx, destAvatarId);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+}
+
+ChatAvatar* ChatAvatarService::GetCachedAvatar(
     const std::wstring& name, const std::wstring& address) {
-    ChatResultCode result = ChatResultCode::SUCCESS;
-    boost::optional<ChatAvatar> avatar;
+    ChatAvatar* avatar = nullptr;
+
+    // First look for the avatar in the cache
+    auto find_iter = std::find_if(
+        std::begin(avatarCache_), std::end(avatarCache_), [name, address](const auto& avatar) {
+            return avatar->name_.compare(name) == 0 && avatar->address_.compare(address) == 0;
+        });
+
+    if (find_iter != std::end(avatarCache_)) {
+        avatar = find_iter->get();
+    }
+
+    return avatar;
+}
+
+ChatAvatar* ChatAvatarService::GetCachedAvatar(uint32_t avatarId) {
+    ChatAvatar* avatar = nullptr;
+
+    // First look for the avatar in the cache
+    auto find_iter = std::find_if(std::begin(avatarCache_), std::end(avatarCache_),
+        [avatarId](const auto& avatar) { return avatar->avatarId_ == avatarId; });
+
+    if (find_iter != std::end(avatarCache_)) {
+        avatar = find_iter->get();
+    }
+
+    return avatar;
+}
+
+std::unique_ptr<ChatAvatar> ChatAvatarService::LoadStoredAvatar(
+    const std::wstring& name, const std::wstring& address) {
+    std::unique_ptr<ChatAvatar> avatar{nullptr};
+
     sqlite3_stmt* stmt;
 
     char sql[] = "SELECT id, user_id, name, address, attributes FROM avatar WHERE name = @name AND "
                  "address = @address";
 
-    if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
-        result = ChatResultCode::DBFAIL;
-    } else {
-        std::string nameStr = FromWideString(name);
-        std::string addressStr = FromWideString(address);
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
 
-        int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
-        int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
+    std::string nameStr = FromWideString(name);
+    std::string addressStr = FromWideString(address);
 
-        sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
-        sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
+    int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
+    int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
 
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            avatar = ChatAvatar{};
-            avatar->avatarId = sqlite3_column_int(stmt, 0);
-            avatar->userId = sqlite3_column_int(stmt, 1);
+    sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
+    sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
 
-            auto tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)));
-            avatar->name = std::wstring{std::begin(tmp), std::end(tmp)};
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        avatar = std::make_unique<ChatAvatar>(this);
+        avatar->avatarId_ = sqlite3_column_int(stmt, 0);
+        avatar->userId_ = sqlite3_column_int(stmt, 1);
 
-            tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)));
-            avatar->address = std::wstring(std::begin(tmp), std::end(tmp));
+        auto tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)));
+        avatar->name_ = std::wstring{std::begin(tmp), std::end(tmp)};
 
-            avatar->attributes = sqlite3_column_int(stmt, 4);
-        } else {
-            result = ChatResultCode::DESTAVATARDOESNTEXIST;
-        }
+        tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)));
+        avatar->address_ = std::wstring(std::begin(tmp), std::end(tmp));
+
+        avatar->attributes_ = sqlite3_column_int(stmt, 4);
     }
 
     sqlite3_finalize(stmt);
 
-    return std::make_pair(result, avatar);
+    return avatar;
 }
 
-ChatResultCode ChatAvatarService::PersistNewAvatar(ChatAvatar& avatar) {
-    ChatResultCode result = ChatResultCode::SUCCESS;
+std::unique_ptr<ChatAvatar> ChatAvatarService::LoadStoredAvatar(uint32_t avatarId) {
+    std::unique_ptr<ChatAvatar> avatar{nullptr};
+
+    sqlite3_stmt* stmt;
+
+    char sql[] = "SELECT id, user_id, name, address, attributes FROM avatar WHERE id = @avatar_id";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+
+    sqlite3_bind_int(stmt, avatarIdIdx, avatarId);
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        avatar = std::make_unique<ChatAvatar>(this);
+        avatar->avatarId_ = sqlite3_column_int(stmt, 0);
+        avatar->userId_ = sqlite3_column_int(stmt, 1);
+
+        auto tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)));
+        avatar->name_ = std::wstring{std::begin(tmp), std::end(tmp)};
+
+        tmp = std::string(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)));
+        avatar->address_ = std::wstring(std::begin(tmp), std::end(tmp));
+
+        avatar->attributes_ = sqlite3_column_int(stmt, 4);
+    }
+
+    sqlite3_finalize(stmt);
+
+    return avatar;
+}
+
+void ChatAvatarService::InsertAvatar(ChatAvatar* avatar) {
+    CHECK_NOTNULL(avatar);
     sqlite3_stmt* stmt;
 
     char sql[] = "INSERT INTO avatar (user_id, name, address, attributes) VALUES (@user_id, @name, "
                  "@address, @attributes)";
 
-    if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
-        result = ChatResultCode::DBFAIL;
-    } else {
-        std::string nameStr = FromWideString(avatar.name);
-        std::string addressStr = FromWideString(avatar.address);
-
-        int userIdIdx = sqlite3_bind_parameter_index(stmt, "@user_id");
-        int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
-        int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
-        int attributesIdx = sqlite3_bind_parameter_index(stmt, "@attributes");
-
-        sqlite3_bind_int(stmt, userIdIdx, avatar.userId);
-        sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
-        sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
-        sqlite3_bind_int(stmt, attributesIdx, avatar.attributes);
-
-        if (sqlite3_step(stmt) != SQLITE_DONE) {
-            result = ChatResultCode::DBFAIL;
-        } else {
-            avatar.avatarId = static_cast<uint32_t>(sqlite3_last_insert_rowid(db_));
-        }
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
     }
 
-    sqlite3_finalize(stmt);
+    std::string nameStr = FromWideString(avatar->name_);
+    std::string addressStr = FromWideString(avatar->address_);
 
-    return result;
+    int userIdIdx = sqlite3_bind_parameter_index(stmt, "@user_id");
+    int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
+    int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
+    int attributesIdx = sqlite3_bind_parameter_index(stmt, "@attributes");
+
+    sqlite3_bind_int(stmt, userIdIdx, avatar->userId_);
+    sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
+    sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
+    sqlite3_bind_int(stmt, attributesIdx, avatar->attributes_);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    avatar->avatarId_ = static_cast<uint32_t>(sqlite3_last_insert_rowid(db_));
+
+    sqlite3_finalize(stmt);
 }
 
-ChatResultCode ChatAvatarService::PersistAvatar(ChatAvatar & avatar) {
-    ChatResultCode result = ChatResultCode::SUCCESS;
+void ChatAvatarService::UpdateAvatar(const ChatAvatar* avatar) {
+    CHECK_NOTNULL(avatar);
     sqlite3_stmt* stmt;
 
-    char sql[] = "UPDATE avatar SET user_id = @user_id, name = @name, address = @address, attributes = @attributes "
+    char sql[] = "UPDATE avatar SET user_id = @user_id, name = @name, address = @address, "
+                 "attributes = @attributes "
                  "WHERE id = @avatar_id";
 
-    if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
-        result = ChatResultCode::DBFAIL;
-    } else {
-        std::string nameStr = FromWideString(avatar.name);
-        std::string addressStr = FromWideString(avatar.address);
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
 
-        int userIdIdx = sqlite3_bind_parameter_index(stmt, "@user_id");
-        int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
-        int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
-        int attributesIdx = sqlite3_bind_parameter_index(stmt, "@attributes");
-        int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+    std::string nameStr = FromWideString(avatar->name_);
+    std::string addressStr = FromWideString(avatar->address_);
 
-        sqlite3_bind_int(stmt, userIdIdx, avatar.userId);
-        sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
-        sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
-        sqlite3_bind_int(stmt, attributesIdx, avatar.attributes);
-        sqlite3_bind_int(stmt, avatarIdIdx, avatar.avatarId);
+    int userIdIdx = sqlite3_bind_parameter_index(stmt, "@user_id");
+    int nameIdx = sqlite3_bind_parameter_index(stmt, "@name");
+    int addressIdx = sqlite3_bind_parameter_index(stmt, "@address");
+    int attributesIdx = sqlite3_bind_parameter_index(stmt, "@attributes");
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
 
-        if (sqlite3_step(stmt) != SQLITE_DONE) {
-            result = ChatResultCode::DBFAIL;
-        }
+    sqlite3_bind_int(stmt, userIdIdx, avatar->userId_);
+    sqlite3_bind_text(stmt, nameIdx, nameStr.c_str(), -1, 0);
+    sqlite3_bind_text(stmt, addressIdx, addressStr.c_str(), -1, 0);
+    sqlite3_bind_int(stmt, attributesIdx, avatar->attributes_);
+    sqlite3_bind_int(stmt, avatarIdIdx, avatar->avatarId_);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
     }
 
     sqlite3_finalize(stmt);
-
-    return result;
 }
 
-std::pair<ChatResultCode, boost::optional<ChatAvatar>> ChatAvatarService::CreateAvatar(
-    const std::wstring& name, const std::wstring& address, uint32_t userId,
-    uint32_t loginAttributes, const std::wstring& loginLocation) {
-    ChatAvatar avatar{name, address, userId, loginAttributes, loginLocation};
+void ChatAvatarService::DeleteAvatar(ChatAvatar* avatar) {
+    CHECK_NOTNULL(avatar);
+    sqlite3_stmt* stmt;
 
-    auto result = PersistNewAvatar(avatar);
+    char sql[] = "DELETE FROM avatar WHERE id = @avatar_id";
 
-    return std::make_pair(result, avatar);
-}
-
-ChatResultCode ChatAvatarService::LoginAvatar(ChatAvatar& avatar) {
-    ChatResultCode result = ChatResultCode::SUCCESS;
-
-    if (!IsAvatarOnline(avatar.name, avatar.address)) {
-        avatar.isOnline = true;
-        onlineAvatars_.insert(std::make_pair(avatar.name + L"+" + avatar.address, avatar));
-    } else {
-        result = ChatResultCode::DUPLICATELOGIN;
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
     }
 
-    return result;
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+
+    sqlite3_bind_int(stmt, avatarIdIdx, avatar->avatarId_);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    sqlite3_finalize(stmt);
 }
 
-void ChatAvatarService::LogoutAvatar(uint32_t avatarId) {
-    auto find_iter = std::find_if(std::begin(onlineAvatars_), std::end(onlineAvatars_), [avatarId](auto& avatarIter) {
-        return avatarIter.second.avatarId == avatarId;
-    });
+void ChatAvatarService::LoadFriendList(ChatAvatar* avatar) {
+    sqlite3_stmt* stmt;
 
-    if (find_iter != std::end(onlineAvatars_)) {
-        onlineAvatars_.erase(find_iter);
+    char sql[] = "SELECT friend_avatar_id, comment FROM friend WHERE avatar_id = @avatar_id";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+
+    sqlite3_bind_int(stmt, avatarIdIdx, avatar->avatarId_);
+
+    uint32_t tmpFriendId;
+    std::string tmpComment;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        tmpFriendId = sqlite3_column_int(stmt, 0);
+        tmpComment = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+
+        auto friendAvatar = GetAvatar(tmpFriendId);
+
+        avatar->friendList_.emplace_back(friendAvatar, ToWideString(tmpComment));
+    }
+}
+
+void ChatAvatarService::LoadIgnoreList(ChatAvatar * avatar) {
+    sqlite3_stmt* stmt;
+
+    char sql[] = "SELECT ignore_avatar_id FROM ignore WHERE avatar_id = @avatar_id";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+
+    sqlite3_bind_int(stmt, avatarIdIdx, avatar->avatarId_);
+
+    uint32_t tmpIgnoreId;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        tmpIgnoreId = sqlite3_column_int(stmt, 0);
+
+        auto ignoreAvatar = GetAvatar(tmpIgnoreId);
+
+        avatar->ignoreList_.emplace_back(ignoreAvatar);
     }
 }

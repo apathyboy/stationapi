@@ -33,7 +33,8 @@ CREATE TABLE persistent_message (id INTEGER PRIMARY KEY,
 
 CREATE TABLE friend (id INTEGER PRIMARY KEY,
                      avatar_id INTEGER,
-                     friend_avatar_id INTEGER);
+                     friend_avatar_id INTEGER,
+                     comment TEXT);
 
 CREATE TABLE ignore (id INTEGER PRIMARY KEY,
                      avatar_id INTEGER,
