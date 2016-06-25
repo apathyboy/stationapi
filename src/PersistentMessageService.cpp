@@ -74,7 +74,7 @@ std::vector<PersistentHeader> PersistentMessageService::GetMessageHeaders(uint32
 
     char sql[]
         = "SELECT id, avatar_id, from_name, from_address, subject, sent_time, status, "
-          "folder, category, message, oob FROM persistent_message WHERE avatar_id = @avatar_id";
+          "folder, category, message, oob FROM persistent_message WHERE avatar_id = @avatar_id AND status IN (1, 2, 3)";
 
     if (sqlite3_prepare_v2(db_, sql, -1, &stmt, 0) != SQLITE_OK) {
         throw std::runtime_error("Error preparing SQL statement");
@@ -168,6 +168,10 @@ PersistentMessageService::GetPersistentMessage(uint32_t avatarId, uint32_t messa
     }
 
     sqlite3_finalize(stmt);
+
+    if (message->header.status == PersistentState::NEW) {
+        UpdateMessageStatus(message->header.avatarId, message->header.messageId, PersistentState::READ);
+    }
 
     return std::make_pair(result, message);
 }
