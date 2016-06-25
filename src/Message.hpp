@@ -68,8 +68,15 @@ enum class ChatMessageType : uint16_t {
 /** Begin FRIENDLOGIN */
 
 struct MFriendLogin {
+    MFriendLogin(const ChatAvatar* avatar_, const std::wstring& friendAddress_, uint32_t destAvatarId_, const std::wstring& friendStatus_)
+        : avatar{avatar_}
+        , friendAddress{friendAddress_}
+        , destAvatarId{destAvatarId_}
+        , friendStatus{friendStatus_} {}
+
     const ChatMessageType type = ChatMessageType::FRIENDLOGIN;
-    ChatAvatar* avatar;
+    const uint32_t track = 0;
+    const ChatAvatar* avatar;
     std::wstring friendAddress;
     uint32_t destAvatarId;
     std::wstring friendStatus;
@@ -78,7 +85,8 @@ struct MFriendLogin {
 template <typename StreamT>
 void write(StreamT& ar, const MFriendLogin& data) {
     write(ar, data.type);
-    write(ar, *data.avatar);
+    write(ar, data.track);
+    write(ar, data.avatar);
     write(ar, data.friendAddress);
     write(ar, data.destAvatarId);
     write(ar, data.friendStatus);

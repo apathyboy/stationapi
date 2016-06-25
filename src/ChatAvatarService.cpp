@@ -18,6 +18,9 @@ ChatAvatar* ChatAvatarService::GetAvatar(const std::wstring& name, const std::ws
         if (loadedAvatar != nullptr) {
             avatar = loadedAvatar.get();
             avatarCache_.emplace_back(std::move(loadedAvatar));
+
+            LoadFriendList(avatar);
+            LoadIgnoreList(avatar);
         }
     }
 
@@ -32,6 +35,9 @@ ChatAvatar* ChatAvatarService::GetAvatar(uint32_t avatarId) {
         if (loadedAvatar != nullptr) {
             avatar = loadedAvatar.get();
             avatarCache_.emplace_back(std::move(loadedAvatar));
+
+            LoadFriendList(avatar);
+            LoadIgnoreList(avatar);
         }
     }
 
@@ -50,11 +56,19 @@ ChatAvatar* ChatAvatarService::CreateAvatar(const std::wstring& name, const std:
     return avatar;
 }
 
-void ChatAvatarService::LoginAvatar(ChatAvatar* avatar) { avatar->isOnline_ = true; }
+void ChatAvatarService::LoginAvatar(ChatAvatar* avatar) {
+    avatar->isOnline_ = true;
+
+    onlineAvatars_.push_back(avatar);
+}
 
 void ChatAvatarService::LogoutAvatar(uint32_t avatarId) {
     auto avatar = GetAvatar(avatarId);
     avatar->isOnline_ = false;
+
+    onlineAvatars_.erase(std::remove_if(std::begin(onlineAvatars_), std::end(onlineAvatars_), [avatar](auto onlineAvatar) {
+        return onlineAvatar->GetAvatarId() == avatar->GetAvatarId();
+    }));
 }
 
 void ChatAvatarService::PersistAvatar(const ChatAvatar* avatar) { 

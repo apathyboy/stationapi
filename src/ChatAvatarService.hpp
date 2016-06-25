@@ -35,6 +35,8 @@ public:
     void RemoveIgnore(uint32_t srcAvatarId, uint32_t destAvatarId);
 
     void UpdateFriendComment(uint32_t srcAvatarId, uint32_t destAvatarId, const std::wstring& comment);
+
+    const std::vector<ChatAvatar*>& GetOnlineAvatars() const { return onlineAvatars_; }
     
 private:
     ChatAvatar* GetCachedAvatar(const std::wstring& name, const std::wstring& address);
@@ -51,5 +53,6 @@ private:
     void LoadIgnoreList(ChatAvatar* avatar);
 
     std::vector<std::unique_ptr<ChatAvatar>> avatarCache_;
+    std::vector<ChatAvatar*> onlineAvatars_;
     sqlite3* db_;
 };

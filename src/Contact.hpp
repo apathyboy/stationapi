@@ -21,7 +21,7 @@ void write(StreamT& ar, const FriendContact& data) {
     write(ar, data.frnd->GetName());
     write(ar, data.frnd->GetAddress());
     write(ar, data.comment);
-    write(ar, data.frnd->IsOnline() ? 1 : 0);
+    write(ar, static_cast<short>(data.frnd->IsOnline() ? 1 : 0));
 }
 
 struct IgnoreContact {

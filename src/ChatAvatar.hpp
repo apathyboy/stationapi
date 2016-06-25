@@ -40,15 +40,15 @@ public:
     const std::wstring& GetStatusMessage() const { return statusMessage_; }
     const bool IsOnline() const { return isOnline_; }
 
-    void AddFriend(const ChatAvatar* avatar, const std::wstring& comment = L"");
-    void RemoveFriend(const ChatAvatar* avatar);
+    void AddFriend(ChatAvatar* avatar, const std::wstring& comment = L"");
+    void RemoveFriend(ChatAvatar* avatar);
     void UpdateFriendComment(const ChatAvatar* avatar, const std::wstring& comment);
     bool IsFriend(const ChatAvatar* avatar);
 
     const std::vector<FriendContact> GetFriendList() const { return friendList_; }
 
-    void AddIgnore(const ChatAvatar* avatar);
-    void RemoveIgnore(const ChatAvatar* avatar);
+    void AddIgnore(ChatAvatar* avatar);
+    void RemoveIgnore(ChatAvatar* avatar);
     bool IsIgnored(const ChatAvatar* avatar);
 
     const std::vector<IgnoreContact> GetIgnoreList() const { return ignoreList_; }
@@ -74,7 +74,6 @@ private:
     bool isOnline_ = false;
 
     std::vector<FriendContact> friendList_;
-    std::vector<const ChatAvatar*> friendToList_;
     std::vector<IgnoreContact> ignoreList_;
 };
 

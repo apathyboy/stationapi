@@ -111,6 +111,21 @@ void GatewayClient::HandleLoginAvatar(const ReqLoginAvatar& request) {
     }
 
     Send(ResLoginAvatar{request.track, result, avatar});
+
+    if (avatar && result == ChatResultCode::SUCCESS) {
+        auto& onlineAvatars = as->GetOnlineAvatars();
+        for (auto onlineAvatar : onlineAvatars) {
+            if (onlineAvatar->IsFriend(avatar)) {
+                Send(MFriendLogin{avatar, avatar->GetAddress(), onlineAvatar->GetAvatarId(), avatar->GetStatusMessage()});
+            }
+        }
+
+        for (auto& contact : avatar->GetFriendList()) {
+            if (contact.frnd->IsOnline()) {
+                Send(MFriendLogin{contact.frnd, contact.frnd->GetAddress(), avatar->GetAvatarId(), contact.frnd->GetStatusMessage()});
+            }
+        }
+    }
 }
 
 void GatewayClient::HandleLogoutAvatar(const ReqLogoutAvatar& request) {
@@ -147,6 +162,10 @@ void GatewayClient::HandleAddFriend(const ReqAddFriend& request) {
     srcAvatar->AddFriend(destAvatar);
 
     Send(ResAddFriend{request.track, result});
+
+    if (destAvatar->IsOnline()) {
+        Send(MFriendLogin{destAvatar, destAvatar->GetAddress(), srcAvatar->GetAvatarId(), destAvatar->GetStatusMessage()});
+    }
 }
 
 void GatewayClient::HandleRemoveFriend(const ReqRemoveFriend& request) {

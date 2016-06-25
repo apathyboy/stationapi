@@ -17,7 +17,7 @@ ChatAvatar::ChatAvatar(ChatAvatarService* avatarService, const std::wstring& nam
 
 void ChatAvatar::SetAttributes(const uint32_t attributes) { attributes_ = attributes; }
 
-void ChatAvatar::AddFriend(const ChatAvatar* avatar, const std::wstring& comment) {
+void ChatAvatar::AddFriend(ChatAvatar* avatar, const std::wstring& comment) {
     if (IsFriend(avatar)) return;    
     if (IsIgnored(avatar)) RemoveIgnore(avatar);
 
@@ -26,7 +26,7 @@ void ChatAvatar::AddFriend(const ChatAvatar* avatar, const std::wstring& comment
     avatarService_->PersistFriend(avatarId_, avatar->avatarId_, comment);
 }
 
-void ChatAvatar::RemoveFriend(const ChatAvatar* avatar) {
+void ChatAvatar::RemoveFriend(ChatAvatar* avatar) {
     auto del_iter = std::remove_if(std::begin(friendList_), std::end(friendList_),
         [avatar](auto& frnd) { return frnd.frnd->GetAvatarId() == avatar->GetAvatarId(); });
 
@@ -58,7 +58,7 @@ bool ChatAvatar::IsFriend(const ChatAvatar* avatar) {
     return false;
 }
 
-void ChatAvatar::AddIgnore(const ChatAvatar* avatar) {
+void ChatAvatar::AddIgnore(ChatAvatar* avatar) {
     if (IsIgnored(avatar)) return;
     if (IsFriend(avatar)) RemoveFriend(avatar);
 
@@ -67,7 +67,7 @@ void ChatAvatar::AddIgnore(const ChatAvatar* avatar) {
     avatarService_->PersistIgnore(avatarId_, avatar->avatarId_);
 }
 
-void ChatAvatar::RemoveIgnore(const ChatAvatar* avatar) {
+void ChatAvatar::RemoveIgnore(ChatAvatar* avatar) {
     auto del_iter = std::remove_if(std::begin(ignoreList_), std::end(ignoreList_),
         [avatar](auto& ignored) { return ignored.ignored->GetAvatarId() == avatar->GetAvatarId(); });
 
