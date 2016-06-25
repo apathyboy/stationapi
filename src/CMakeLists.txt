@@ -15,7 +15,6 @@ add_executable(swgchat
     ChatRoom.hpp
     ChatRoomService.cpp
     ChatRoomService.hpp
-    Contact.hpp
     GatewayClient.cpp
     GatewayClient.hpp
     GatewayNode.cpp

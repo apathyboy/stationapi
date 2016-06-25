@@ -1,13 +1,13 @@
 
 #pragma once
 
-#include "Contact.hpp"
 #include "Serialization.hpp"
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
+class ChatAvatar;
 class ChatAvatarService;
 
 enum class AvatarAttribute : uint32_t {
@@ -16,6 +16,22 @@ enum class AvatarAttribute : uint32_t {
     SUPERGM = 1 << 2,
     SUPERSNOOP = 1 << 3,
     EXTENDED = 1 << 4
+};
+
+struct FriendContact {
+    FriendContact(const ChatAvatar* frnd_, const std::wstring& comment_)
+            : frnd{frnd_}
+            , comment{comment_} {}
+
+    const ChatAvatar* frnd;
+    std::wstring comment = L"";
+};
+
+struct IgnoreContact {
+    IgnoreContact(const ChatAvatar* ignored_)
+            : ignored{ignored_} {}
+
+    const ChatAvatar* ignored;
 };
 
 class ChatAvatar {
@@ -89,4 +105,19 @@ void write(StreamT& ar, const ChatAvatar* data) {
     write(ar, data->GetGateway());
     write(ar, data->GetServerId());
     write(ar, data->GetGatewayId());
+}
+
+
+template <typename StreamT>
+void write(StreamT& ar, const FriendContact& data) {
+    write(ar, data.frnd->GetName());
+    write(ar, data.frnd->GetAddress());
+    write(ar, data.comment);
+    write(ar, static_cast<short>(data.frnd->IsOnline() ? 1 : 0));
+}
+
+template <typename StreamT>
+void write(StreamT& ar, const IgnoreContact& data) {
+    write(ar, data.ignored->GetName());
+    write(ar, data.ignored->GetAddress());
 }

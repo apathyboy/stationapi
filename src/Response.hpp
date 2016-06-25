@@ -4,7 +4,6 @@
 #include "ChatAvatar.hpp"
 #include "ChatEnums.hpp"
 #include "ChatRoom.hpp"
-#include "Contact.hpp"
 #include "PersistentMessage.hpp"
 #include "Serialization.hpp"
 
