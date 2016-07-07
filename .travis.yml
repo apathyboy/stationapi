@@ -4,6 +4,7 @@ language: cpp
 compiler:
   - gcc
 script:
+  - git clone git@bitbucket.org:swgathrawn/udplibrary.git externals/udplibrary
   - mkdir build
   - cd build
   - cmake .. && make
