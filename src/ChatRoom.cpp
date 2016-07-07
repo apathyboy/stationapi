@@ -64,7 +64,6 @@ void ChatRoom::EnterRoom(ChatAvatar* avatar, const std::u16string& password) {
     }
 
     avatars_.push_back(avatar);
-    avatarIds_.push_back(avatar->GetAvatarId());
     avatar->JoinRoom(this);
 }
 
@@ -85,14 +84,18 @@ void ChatRoom::LeaveRoom(ChatAvatar* avatar) {
     if (avatarsIter != std::end(avatars_)) {
         avatars_.erase(avatarsIter);
     }
+}
 
-    auto avatarsIdIter = std::remove_if(std::begin(avatarIds_), std::end(avatarIds_), [avatar](auto avatarId) {
-        return avatar->GetAvatarId() == avatarId;
-    });
+std::vector<uint32_t> ChatRoom::GetAvatarIds(const ChatAvatar * srcAvatar) const {
+    std::vector<uint32_t> avatarIds;
 
-    if (avatarsIdIter != std::end(avatarIds_)) {
-        avatarIds_.erase(avatarsIdIter);
+    for (auto roomAvatar : avatars_) {
+        if (roomAvatar->IsIgnored(srcAvatar)) {
+            avatarIds.push_back(roomAvatar->GetAvatarId());
+        }
     }
+
+    return std::vector<uint32_t>();
 }
 
 std::vector<std::u16string> ChatRoom::GetConnectedAddresses() const {

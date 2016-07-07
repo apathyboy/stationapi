@@ -210,7 +210,7 @@ void GatewayClient::SendRoomMessageUpdate(const ChatAvatar* srcAvatar, const Cha
     uint32_t messageId, const std::u16string& message, const std::u16string& oob) {
     auto connectedAddresses = room->GetConnectedAddresses();
     for (auto& address : connectedAddresses) {
-        node_->SendTo(address, MRoomMessage{srcAvatar, room->GetRoomId(), room->GetAvatarIds(),
+        node_->SendTo(address, MRoomMessage{srcAvatar, room->GetRoomId(), room->GetAvatarIds(srcAvatar),
                                    message, oob, messageId});
     }
 }

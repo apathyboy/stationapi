@@ -51,8 +51,10 @@ public:
     uint32_t GetCreateTime() const { return createTime_; }
     uint32_t GetNodeLevel() const { return nodeLevel_; }
 
-    const std::vector<ChatAvatar*> GetAvatars() const { return avatars_; }
-    std::vector<uint32_t> GetAvatarIds() const { return avatarIds_; }
+    const std::vector<ChatAvatar*> GetAvatars() const { return avatars_; }    
+    /** Returns a list of id's in the room that are not ignoring the srcAvatar.
+    */
+    std::vector<uint32_t> GetAvatarIds(const ChatAvatar* srcAvatar) const;
     const std::vector<const ChatAvatar*> GetAdminstrators() const { return administrators_; }
     const std::vector<const ChatAvatar*> GetModerators() const { return moderators_; }
     const std::vector<const ChatAvatar*> GetTempModerators() const { return tempModerators_; }
@@ -107,7 +109,6 @@ private:
     int32_t dbId_ = -1;
 
     std::vector<ChatAvatar*> avatars_;
-    std::vector<uint32_t> avatarIds_;
     std::vector<const ChatAvatar*> administrators_;
     std::vector<const ChatAvatar*> moderators_;
     std::vector<const ChatAvatar*> tempModerators_;
