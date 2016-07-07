@@ -149,4 +149,6 @@ const char* ToString(ChatResultCode code) {
     case ChatResultCode::INVALID_INPUT:
         return "INVALID_INPUT";
     };
+
+    return "";
 }
