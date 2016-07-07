@@ -26,6 +26,10 @@ SendPersistentMessage::SendPersistentMessage(GatewayClient * client, const Reque
             throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
         }
 
+        if (destAvatar->IsIgnored(srcAvatar)) {
+            throw ChatResultException(ChatResultCode::IGNORING);
+        }
+
         message.header.fromName = srcAvatar->GetName();
         message.header.fromAddress = srcAvatar->GetAddress();
     } else {

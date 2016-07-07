@@ -24,5 +24,9 @@ SendInstantMessage::SendInstantMessage(
         throw ChatResultException(ChatResultCode::DESTAVATARDOESNTEXIST);
     }
 
+    if (destAvatar->IsIgnored(srcAvatar)) {
+        throw ChatResultException(ChatResultCode::IGNORING);
+    }
+
     client->SendInstantMessageUpdate(srcAvatar, destAvatar, request.message, request.oob);
 }
