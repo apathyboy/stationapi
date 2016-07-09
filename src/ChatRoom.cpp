@@ -90,7 +90,7 @@ std::vector<uint32_t> ChatRoom::GetAvatarIds(const ChatAvatar * srcAvatar) const
     std::vector<uint32_t> avatarIds;
 
     for (auto roomAvatar : avatars_) {
-        if (roomAvatar->IsIgnored(srcAvatar)) {
+        if (!roomAvatar->IsIgnored(srcAvatar)) {
             avatarIds.push_back(roomAvatar->GetAvatarId());
         }
     }
