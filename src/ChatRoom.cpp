@@ -95,7 +95,7 @@ std::vector<uint32_t> ChatRoom::GetAvatarIds(const ChatAvatar * srcAvatar) const
         }
     }
 
-    return std::vector<uint32_t>();
+    return avatarIds;
 }
 
 std::vector<std::u16string> ChatRoom::GetConnectedAddresses() const {
