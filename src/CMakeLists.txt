@@ -9,71 +9,39 @@ if(HAVE_UDPLIBRARY)
 endif()
 
 set(SOURCES
-    protocol/AddBan.cpp
     protocol/AddBan.hpp
-    protocol/AddFriend.cpp
     protocol/AddFriend.hpp
-    protocol/AddIgnore.cpp
     protocol/AddIgnore.hpp
-    protocol/AddInvite.cpp
     protocol/AddInvite.hpp
-    protocol/AddModerator.cpp
     protocol/AddModerator.hpp
-    protocol/CreateRoom.cpp
     protocol/CreateRoom.hpp
-    protocol/DestroyAvatar.cpp
     protocol/DestroyAvatar.hpp
-    protocol/DestroyRoom.cpp
     protocol/DestroyRoom.hpp
-    protocol/EnterRoom.cpp
     protocol/EnterRoom.hpp
-    protocol/FailoverReLoginAvatar.cpp
     protocol/FailoverReLoginAvatar.hpp
-    protocol/FriendStatus.cpp
     protocol/FriendStatus.hpp
-    protocol/GetAnyAvatar.cpp
     protocol/GetAnyAvatar.hpp
-    protocol/GetPersistentHeaders.cpp
     protocol/GetPersistentHeaders.hpp
-    protocol/GetPersistentMessage.cpp
     protocol/GetPersistentMessage.hpp
-    protocol/GetRoom.cpp
     protocol/GetRoom.hpp
-    protocol/GetRoomSummaries.cpp
     protocol/GetRoomSummaries.hpp
-    protocol/IgnoreStatus.cpp
     protocol/IgnoreStatus.hpp
-    protocol/KickAvatar.cpp
     protocol/KickAvatar.hpp
-    protocol/LeaveRoom.cpp
     protocol/LeaveRoom.hpp
-    protocol/LoginAvatar.cpp
     protocol/LoginAvatar.hpp
-    protocol/LogoutAvatar.cpp
     protocol/LogoutAvatar.hpp
-    protocol/RegistrarGetChatServer.cpp
+    protocol/Protocol.cpp
     protocol/RegistrarGetChatServer.hpp
-    protocol/RemoveBan.cpp
     protocol/RemoveBan.hpp
-    protocol/RemoveFriend.cpp
     protocol/RemoveFriend.hpp
-    protocol/RemoveIgnore.cpp
     protocol/RemoveIgnore.hpp
-    protocol/RemoveInvite.cpp
     protocol/RemoveInvite.hpp
-    protocol/RemoveModerator.cpp
     protocol/RemoveModerator.hpp
-    protocol/SendInstantMessage.cpp
     protocol/SendInstantMessage.hpp
-    protocol/SendPersistentMessage.cpp
     protocol/SendPersistentMessage.hpp
-    protocol/SendRoomMessage.cpp
     protocol/SendRoomMessage.hpp
-    protocol/SetApiVersion.cpp
     protocol/SetApiVersion.hpp
-    protocol/SetAvatarAttributes.cpp
     protocol/SetAvatarAttributes.hpp
-    protocol/UpdatePersistentMessage.cpp
     protocol/UpdatePersistentMessage.hpp
 
     ChatAvatar.cpp
