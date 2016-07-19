@@ -196,7 +196,7 @@ DestroyAvatar::DestroyAvatar(
     }
 
     // Remove From All Rooms
-    for (auto room : avatar->GetJoinedRooms()) {
+    for (auto room : roomService_->GetJoinedRooms(avatar)) {
         auto addresses = room->GetConnectedAddresses();
         room->LeaveRoom(avatar);
 
@@ -287,7 +287,7 @@ FailoverReLoginAvatar::FailoverReLoginAvatar(
         client->SendFriendLoginUpdates(avatar);
     }
 
-    for (auto room : avatar->GetJoinedRooms()) {
+    for (auto room : roomService_->GetJoinedRooms(avatar)) {
         client->SendEnterRoomUpdate(avatar, room);
     }
 }
@@ -462,7 +462,7 @@ LogoutAvatar::LogoutAvatar(GatewayClient* client, const RequestType& request, Re
 
     auto avatar = avatarService_->GetAvatar(request.avatarId);
 
-    for (auto room : avatar->GetJoinedRooms()) {
+    for (auto room : roomService_->GetJoinedRooms(avatar)) {
         auto addresses = room->GetConnectedAddresses();
         room->LeaveRoom(avatar);
 

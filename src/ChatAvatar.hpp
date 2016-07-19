@@ -75,10 +75,6 @@ public:
 
     const std::vector<IgnoreContact> GetIgnoreList() const { return ignoreList_; }
 
-    std::vector<ChatRoom*> GetJoinedRooms();
-    void JoinRoom(ChatRoom* room);
-    void UnjoinRoom(ChatRoom* room);
-
 private:
     friend class ChatAvatarService;
 

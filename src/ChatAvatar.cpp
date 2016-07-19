@@ -89,19 +89,3 @@ bool ChatAvatar::IsIgnored(const ChatAvatar* avatar) {
 
     return false;
 }
-
-std::vector<ChatRoom*> ChatAvatar::GetJoinedRooms() {
-    return rooms_;
-}
-
-void ChatAvatar::JoinRoom(ChatRoom * room) {
-    rooms_.push_back(room);
-}
-
-void ChatAvatar::UnjoinRoom(ChatRoom * room) {
-    if (rooms_.empty()) return;
-
-    rooms_.erase(std::remove_if(std::begin(rooms_), std::end(rooms_), [room](const auto joinedRoom) {
-        return room->GetRoomId() == joinedRoom->GetRoomId();
-    }));
-}

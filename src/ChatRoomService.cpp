@@ -208,6 +208,18 @@ ChatRoom* ChatRoomService::GetRoom(const std::u16string& roomAddress) {
     return room;
 }
 
+std::vector<ChatRoom*> ChatRoomService::GetJoinedRooms(const ChatAvatar * avatar) {
+    std::vector<ChatRoom*> rooms;
+
+    for (auto& room : rooms_) {
+        if (room->IsInRoom(avatar->GetAvatarId())) {
+            rooms.push_back(room.get());
+        }
+    }
+
+    return rooms;
+}
+
 void ChatRoomService::DeleteRoom(ChatRoom* room) {
     sqlite3_stmt* stmt;
     char sql[] = "DELETE FROM room WHERE id = @id";

@@ -37,6 +37,8 @@ public:
     bool RoomExists(const std::u16string& roomAddress) const;
     ChatRoom* GetRoom(const std::u16string& roomAddress);
 
+    std::vector<ChatRoom*> GetJoinedRooms(const ChatAvatar* avatar);
+
 private:
     friend class ChatRoom;
     void DeleteRoom(ChatRoom* room);

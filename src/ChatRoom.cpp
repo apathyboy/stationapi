@@ -64,7 +64,6 @@ void ChatRoom::EnterRoom(ChatAvatar* avatar, const std::u16string& password) {
     }
 
     avatars_.push_back(avatar);
-    avatar->JoinRoom(this);
 }
 
 bool ChatRoom::IsInRoom(ChatAvatar* avatar) const { return IsInRoom(avatar->GetAvatarId()); }
@@ -76,8 +75,6 @@ bool ChatRoom::IsInRoom(uint32_t avatarId) const {
 }
 
 void ChatRoom::LeaveRoom(ChatAvatar* avatar) {
-    avatar->UnjoinRoom(this);
-
     auto avatarsIter = std::remove_if(std::begin(avatars_), std::end(avatars_),
         [avatar](auto roomAvatar) { return roomAvatar->GetAvatarId() == avatar->GetAvatarId(); });
 
