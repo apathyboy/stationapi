@@ -229,12 +229,6 @@ DestroyRoom::DestroyRoom(GatewayClient* client, const RequestType& request, Resp
 
     response.roomId = roomId;
 
-    for (auto roomAvatar : room->GetAvatars()) {
-        auto roomAddresses = room->GetConnectedAddresses();
-        room->LeaveRoom(roomAvatar);
-        client->SendLeaveRoomUpdate(roomAddresses, roomAvatar->GetAvatarId(), roomId);
-    }
-
     roomService_->DestroyRoom(room);
 
     client->SendDestroyRoomUpdate(srcAvatar, roomId, addresses);
