@@ -14,11 +14,23 @@
 #include <iostream>
 #include <thread>
 
+#ifdef __GNUC__
+#include <execinfo.h>
+#endif
+
 INITIALIZE_EASYLOGGINGPP
 
 StationChatConfig BuildConfiguration(int argc, char* argv[]);
 
+#ifdef __GNUC__
+void SignalHandler(int sig);
+#endif
+
 int main(int argc, char* argv[]) {
+#ifdef __GNUC__
+    signal(SIGSEGV, SignalHandler);
+#endif
+
     auto config = BuildConfiguration(argc, argv);
 
     el::Loggers::setDefaultConfigurations(config.loggerConfig, true);
@@ -47,7 +59,7 @@ StationChatConfig BuildConfiguration(int argc, char* argv[]) {
         ("config,c", po::value<std::string>(&configFile)->default_value("swgchat.cfg"),
             "sets path to the configuration file")
         ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("logger.cfg"),
-            "setspath to the logger configuration file")
+            "sets path to the logger configuration file")
         ;
 
     po::options_description options("Configuration");
@@ -89,3 +101,15 @@ StationChatConfig BuildConfiguration(int argc, char* argv[]) {
 
     return config;
 }
+
+#ifdef __GNUC__
+void SignalHandler(int sig) {
+    const int BACKTRACE_LIMIT = 10;
+    void *arr[BACKTRACE_LIMIT];
+    auto size = backtrace(arr, BACKTRACE_LIMIT);
+
+    fprintf(stderr, "Error: signal %d:\n", sig);
+    backtrace_symbols_fd(arr, size, STDERR_FILENO);
+    exit(1);
+}
+#endif
