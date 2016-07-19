@@ -53,7 +53,7 @@ private:
             HandlerT(this, request, response);
         } catch (const ChatResultException& e) {
             response.result = e.code;
-            LOG(ERROR) << "ChatAPI Error: [" << ToString(e.code) << "] " << e.message;
+            LOG(ERROR) << "ChatAPI Result Exception: [" << ToString(e.code) << "] " << e.message;
         } catch (const SQLite3Exception& e) {
             response.result = ChatResultCode::DATABASE;
             LOG(ERROR) << "Database Error: [" << e.code << "] " << e.message;
