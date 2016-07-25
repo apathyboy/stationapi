@@ -39,5 +39,5 @@ add_subdirectory(externals)
 add_subdirectory(src)
 add_subdirectory(tests)
 
-configure_file(extras/logger.cfg.dist src/logger.cfg COPYONLY)
-configure_file(extras/swgchat.cfg.dist src/swgchat.cfg COPYONLY)
+configure_file(extras/logger.cfg.dist src/stationchat/logger.cfg COPYONLY)
+configure_file(extras/swgchat.cfg.dist src/stationchat/swgchat.cfg COPYONLY)
