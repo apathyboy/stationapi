@@ -1,4 +1,8 @@
-# swgchat [![Build Status](https://travis-ci.com/apathyboy/swgchat.svg?token=FbjsTwsn9ctKssvZJqCa&branch=master)](https://travis-ci.com/apathyboy/swgchat) #
+# stationapi [![Build Status](https://travis-ci.com/apathyboy/swgchat.svg?token=FbjsTwsn9ctKssvZJqCa&branch=master)](https://travis-ci.com/apathyboy/stationapi) #
+
+A base library at the core of applications that implement chat and login functionality across galaxies.
+
+# stationchat
 
 An open implementation of the chat gateway that SOE based games used to provide various social communication features such as mail, custom chat rooms, friend management, etc.
 
@@ -12,16 +16,14 @@ Uses the SOE libraries to implement chat features in a standalone utility. Ideal
 
 ## External Dependencies ##
 
-c++14 compatible compiler
-boost::iostreams (header only)
-boost::optional (header only)
-boost::program_options
-sqlite3
-udplibrary - bundled in the Star Wars Galaxies official source
+* c++14 compatible compiler
+* boost::program_options
+* sqlite3
+* udplibrary - bundled in the Star Wars Galaxies official source
 
 ## Building ##
 
-Copy the udplibrary directory from the Star Wars Galaxies offical source to the top level swgchat directory, then run the following:
+Copy the udplibrary directory from the Star Wars Galaxies offical source to the top level swgchat directory, install the remaining dependencies via a package manager, then run the following:
 
     mkdir build; cd build
     cmake ..
