@@ -12,9 +12,11 @@ cmake_minimum_required(VERSION 2.8)
 project(stationapi CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
 include(GroupSourceByFilesystem)
 include(ModernCpp)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if (EXISTS "${PROJECT_SOURCE_DIR}/externals/udplibrary/CMakeLists.txt")
@@ -39,5 +41,6 @@ add_subdirectory(externals)
 add_subdirectory(src)
 add_subdirectory(tests)
 
-configure_file(extras/logger.cfg.dist src/stationchat/logger.cfg COPYONLY)
-configure_file(extras/swgchat.cfg.dist src/stationchat/swgchat.cfg COPYONLY)
+configure_file(extras/logger.cfg.dist bin/logger.cfg COPYONLY)
+configure_file(extras/swgchat.cfg.dist bin/swgchat.cfg COPYONLY)
+configure_file(extras/chat.db.dist bin/chat.db COPYONLY)

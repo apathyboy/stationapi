@@ -31,9 +31,29 @@ Copy the udplibrary directory from the Star Wars Galaxies offical source to the 
 
 ## Database Initialization ##
 
-Create the database with the following commands:
+By default, a clean database instance is provided and placed with the default configuration files in the **build/bin** directory; therefore, nothing needs to be done for new installations, the db is already created and placed in the appropriate location.
+
+To create a new, clean database instance, use the following commands:
 
     sqlite3 chat.db
-    sqlite> .read /path/to/init_database.sql
+    sqlite> .read /path/to/extras/init_database.sql
 
 Then update the **database_path** config option with the full path to the database.
+
+## Running ##
+
+A default configuration and database is created when building the project. Configure the listen address/ports in **build/bin/stationchat.cfg**. Then run the following commands from the project root:
+
+### Windows ###
+
+    cd build/bin
+    .\Debug\stationchat.exe
+
+### Linux ###
+
+    cd build/bin
+    ./stationchat
+
+## Final Notes ##
+
+It is recommended to copy the **build/bin** directory to another location after building to ensure the configuration files are not overwritten by future changes to the default versions of these files.
