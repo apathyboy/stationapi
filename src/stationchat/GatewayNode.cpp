@@ -9,7 +9,7 @@
 #include <sqlite3.h>
 
 GatewayNode::GatewayNode(StationChatConfig& config)
-    : Node(this, config.gatewayAddress, config.gatewayPort)
+    : Node(this, config.gatewayAddress, config.gatewayPort, config.bindToIp)
     , config_{config} {
     if (sqlite3_open(config.chatDatabasePath.c_str(), &db_) != SQLITE_OK) {
         throw std::runtime_error("Can't open database: " + std::string{sqlite3_errmsg(db_)});
