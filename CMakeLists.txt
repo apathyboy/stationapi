@@ -33,7 +33,7 @@ set(Boost_USE_MULTITHREADED ON)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(SQLite3 REQUIRED)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if (NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
 endif ()
 
