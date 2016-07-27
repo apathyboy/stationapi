@@ -4,7 +4,7 @@
 #include "StationChatConfig.hpp"
 
 RegistrarNode::RegistrarNode(StationChatConfig& config)
-    : Node(this, config.registrarAddress, config.registrarPort)
+    : Node(this, config.registrarAddress, config.registrarPort, config.bindToIp)
     , config_{config} {}
 
 RegistrarNode::~RegistrarNode() {}

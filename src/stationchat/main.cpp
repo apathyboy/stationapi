@@ -20,13 +20,13 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-StationChatConfig BuildConfiguration(int argc, char* argv[]);
+StationChatConfig BuildConfiguration(int argc, const char* argv[]);
 
 #ifdef __GNUC__
 void SignalHandler(int sig);
 #endif
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
 #ifdef __GNUC__
     signal(SIGSEGV, SignalHandler);
 #endif
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-StationChatConfig BuildConfiguration(int argc, char* argv[]) {
+StationChatConfig BuildConfiguration(int argc, const char* argv[]) {
     namespace po = boost::program_options;
     StationChatConfig config;
     std::string configFile;
@@ -72,6 +72,8 @@ StationChatConfig BuildConfiguration(int argc, char* argv[]) {
             "address for registrar connections")
         ("registrar_port", po::value<uint16_t>(&config.registrarPort)->default_value(5000),
             "port for registrar connections")
+        ("bind_to_ip", po::value<bool>(&config.bindToIp)->default_value(false),
+            "when set to true, binds to the config address; otherwise, binds on any interface")
         ("database_path", po::value<std::string>(&config.chatDatabasePath)->default_value("chat.db"),
             "path to the sqlite3 database file")
         ;

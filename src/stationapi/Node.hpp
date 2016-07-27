@@ -11,12 +11,20 @@
 template <typename NodeT, typename ClientT>
 class Node : public UdpManagerHandler {
 public:
-    explicit Node(NodeT* node, const std::string& listenAddress, uint16_t listenPort)
+    explicit Node(NodeT* node, const std::string& listenAddress, uint16_t listenPort, bool bindToIp = false)
         : node_{node} {
 
         UdpManager::Params params;
         params.handler = this;
         params.port = listenPort;
+
+        if (bindToIp) {
+            if (listenAddress.length() > sizeof(params.bindIpAddress)) {
+                throw std::runtime_error{"Invalid bind ip specified: " + listenAddress};
+            }
+
+            std::copy(std::begin(listenAddress), std::end(listenAddress), params.bindIpAddress);
+        }
 
         udpManager_ = new UdpManager(&params);
     }
