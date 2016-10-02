@@ -1,4 +1,4 @@
-# stationapi [![Build Status](https://travis-ci.com/apathyboy/stationapi.svg?token=FbjsTwsn9ctKssvZJqCa&branch=master)](https://travis-ci.com/apathyboy/stationapi) #
+# stationapi [![Build Status](https://travis-ci.org/apathyboy/stationapi.svg?branch=master)](https://travis-ci.com/apathyboy/stationapi) #
 
 A base library at the core of applications that implement chat and login functionality across galaxies.
 
