@@ -37,6 +37,21 @@ add_subdirectory(externals)
 add_subdirectory(src)
 add_subdirectory(tests)
 
-configure_file(extras/logger.cfg.dist bin/logger.cfg COPYONLY)
-configure_file(extras/swgchat.cfg.dist bin/swgchat.cfg COPYONLY)
-configure_file(extras/chat.db.dist bin/chat.db COPYONLY)
+install(FILES
+    extras/logger.cfg.dist
+    DESTINATION etc/stationapi
+    RENAME logger.cfg)
+
+install(FILES
+    extras/swgchat.cfg.dist
+    DESTINATION etc/stationapi
+    RENAME swgchat.cfg)
+
+install(FILES
+    extras/stationchat.db.dist
+    DESTINATION var/stationapi
+    RENAME stationchat.db)
+
+install(FILES
+    extras/init_database.sql
+    DESTINATION share/stationapi)

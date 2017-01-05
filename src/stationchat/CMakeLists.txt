@@ -82,3 +82,5 @@ target_link_libraries(stationchat
 if(WIN32)
     target_link_libraries(stationchat ws2_32)
 endif()
+
+install(TARGETS stationchat RUNTIME DESTINATION bin)
