@@ -1,12 +1,5 @@
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${PROJECT_SOURCE_DIR}/src/stationapi
-    ${PROJECT_SOURCE_DIR}/externals/easyloggingpp
-    ${PROJECT_SOURCE_DIR}/externals/udplibrary
-    ${Boost_INCLUDE_DIRS}
-    ${SQLite3_INCLUDE_DIR})
 
-set(SOURCES
+add_executable(stationchat
     protocol/AddBan.hpp
     protocol/AddFriend.hpp
     protocol/AddIgnore.hpp
@@ -69,15 +62,14 @@ set(SOURCES
     StationChatApp.hpp
     StationChatConfig.hpp)
 
-add_executable(stationchat ${SOURCES})
-
-GroupSourceByFilesystem("${SOURCES}")
-
 target_link_libraries(stationchat
     stationapi
     udplibrary
     ${Boost_LIBRARIES}
     ${SQLite3_LIBRARY})
+
+target_include_directories(stationchat PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(WIN32)
     target_link_libraries(stationchat ws2_32)

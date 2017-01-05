@@ -1,11 +1,5 @@
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${PROJECT_SOURCE_DIR}/externals/easyloggingpp
-    ${PROJECT_SOURCE_DIR}/externals/udplibrary
-    ${Boost_INCLUDE_DIRS}
-    ${SQLite3_INCLUDE_DIR})
 
-set(SOURCES
+add_library(stationapi
     Node.hpp
     NodeClient.cpp
     NodeClient.hpp
@@ -16,6 +10,17 @@ set(SOURCES
     StringUtils.cpp
     StringUtils.hpp)
 
-add_library(stationapi ${SOURCES})
+target_include_directories(stationapi PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/externals/catch
+    ${PROJECT_SOURCE_DIR}/externals/easyloggingpp
+    ${PROJECT_SOURCE_DIR}/externals/udplibrary
+    ${Boost_INCLUDE_DIRS}
+    ${SQLite3_INCLUDE_DIR})
 
-GroupSourceByFilesystem("${SOURCES}")
+add_executable(stationapi_tests
+    Serialization_Tests.cpp
+    StringUtils_Tests.cpp)
+
+target_link_libraries(stationapi_tests
+    stationapi)
