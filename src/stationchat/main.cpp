@@ -74,7 +74,7 @@ StationChatConfig BuildConfiguration(int argc, const char* argv[]) {
             "port for registrar connections")
         ("bind_to_ip", po::value<bool>(&config.bindToIp)->default_value(false),
             "when set to true, binds to the config address; otherwise, binds on any interface")
-        ("database_path", po::value<std::string>(&config.chatDatabasePath)->default_value("chat.db"),
+        ("database_path", po::value<std::string>(&config.chatDatabasePath)->default_value("var/stationapi/stationchat.db"),
             "path to the sqlite3 database file")
         ;
 
