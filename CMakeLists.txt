@@ -33,10 +33,6 @@ set(Boost_USE_MULTITHREADED ON)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(SQLite3 REQUIRED)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
-endif ()
-
 add_subdirectory(externals)
 add_subdirectory(src)
 add_subdirectory(tests)
