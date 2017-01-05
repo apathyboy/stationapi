@@ -56,9 +56,9 @@ StationChatConfig BuildConfiguration(int argc, const char* argv[]) {
     po::options_description generic("Generic options");
     generic.add_options()
         ("help,h", "produces help message")
-        ("config,c", po::value<std::string>(&configFile)->default_value("swgchat.cfg"),
+        ("config,c", po::value<std::string>(&configFile)->default_value("etc/stationapi/swgchat.cfg"),
             "sets path to the configuration file")
-        ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("logger.cfg"),
+        ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("etc/stationapi/logger.cfg"),
             "sets path to the logger configuration file")
         ;
 
