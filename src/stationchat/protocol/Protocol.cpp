@@ -272,7 +272,9 @@ FailoverReLoginAvatar::FailoverReLoginAvatar(
             request.attributes, request.loginLocation);
     }
 
-    avatarService_->LoginAvatar(CHECK_NOTNULL(avatar));
+    CHECK_NOTNULL(avatar);
+
+    avatarService_->LoginAvatar(avatar);
 
     if (avatar->GetName().compare(u"SYSTEM") == 0) {
         client->GetNode()->RegisterClientAddress(avatar->GetAddress(), client);
@@ -437,7 +439,9 @@ LoginAvatar::LoginAvatar(GatewayClient* client, const RequestType& request, Resp
             request.loginAttributes, request.loginLocation);
     }
 
-    avatarService_->LoginAvatar(CHECK_NOTNULL(avatar));
+    CHECK_NOTNULL(avatar);
+
+    avatarService_->LoginAvatar(avatar);
 
     if (avatar->GetName().compare(u"SYSTEM") == 0) {
         client->GetNode()->RegisterClientAddress(avatar->GetAddress(), client);
