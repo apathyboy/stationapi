@@ -66,13 +66,10 @@ target_link_libraries(stationchat
     stationapi
     udplibrary
     ${Boost_LIBRARIES}
-    ${SQLite3_LIBRARY})
+    ${SQLite3_LIBRARY}
+    $<$<PLATFORM_ID:Windows>:ws2_32>)
 
 target_include_directories(stationchat PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR})
-
-if(WIN32)
-    target_link_libraries(stationchat ws2_32)
-endif()
 
 install(TARGETS stationchat RUNTIME DESTINATION bin)

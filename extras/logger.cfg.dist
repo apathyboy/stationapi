@@ -14,5 +14,5 @@
 * INFO:
     FILENAME = "var/log/swgchat.log"
 * VERBOSE:
-    FILENAME = "var/log/verbose.%datetime{%Y%M%d_%H%m%s}.log"
+    FILENAME = "var/log/swgchat-verbose.%datetime{%Y%M%d_%H%m%s}.log"
     TO_STANDARD_OUTPUT = false
