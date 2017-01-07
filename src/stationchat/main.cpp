@@ -1,7 +1,7 @@
 
 
 #define ELPP_DISABLE_DEFAULT_CRASH_HANDLING 1
-#define ELPP_DEFAULT_LOG_FILE "logs/swgchat.log"
+#define ELPP_NO_DEFAULT_LOG_FILE
 
 #include "easylogging++.h"
 
