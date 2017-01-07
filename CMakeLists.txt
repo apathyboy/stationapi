@@ -7,14 +7,12 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "CMake should have crashed - this is a failsafe in case the call used to trigger the crash gets fixed.")
 endif()
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
-project(stationapi CXX)
+project(stationapi VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
-include(GroupSourceByFilesystem)
 include(ModernCpp)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -33,14 +31,25 @@ set(Boost_USE_MULTITHREADED ON)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(SQLite3 REQUIRED)
 
-if (NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings")
-endif ()
-
 add_subdirectory(externals)
 add_subdirectory(src)
 add_subdirectory(tests)
 
-configure_file(extras/logger.cfg.dist bin/logger.cfg COPYONLY)
-configure_file(extras/swgchat.cfg.dist bin/swgchat.cfg COPYONLY)
-configure_file(extras/chat.db.dist bin/chat.db COPYONLY)
+install(FILES
+    extras/logger.cfg.dist
+    DESTINATION etc/stationapi
+    RENAME logger.cfg)
+
+install(FILES
+    extras/swgchat.cfg.dist
+    DESTINATION etc/stationapi
+    RENAME swgchat.cfg)
+
+install(FILES
+    extras/stationchat.db.dist
+    DESTINATION var/stationapi
+    RENAME stationchat.db)
+
+install(FILES
+    extras/init_database.sql
+    DESTINATION share/stationapi)

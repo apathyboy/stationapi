@@ -1,7 +1,7 @@
 
 
 #define ELPP_DISABLE_DEFAULT_CRASH_HANDLING 1
-#define ELPP_DEFAULT_LOG_FILE "logs/swgchat.log"
+#define ELPP_NO_DEFAULT_LOG_FILE
 
 #include "easylogging++.h"
 
@@ -56,9 +56,9 @@ StationChatConfig BuildConfiguration(int argc, const char* argv[]) {
     po::options_description generic("Generic options");
     generic.add_options()
         ("help,h", "produces help message")
-        ("config,c", po::value<std::string>(&configFile)->default_value("swgchat.cfg"),
+        ("config,c", po::value<std::string>(&configFile)->default_value("etc/stationapi/swgchat.cfg"),
             "sets path to the configuration file")
-        ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("logger.cfg"),
+        ("logger_config", po::value<std::string>(&config.loggerConfig)->default_value("etc/stationapi/logger.cfg"),
             "sets path to the logger configuration file")
         ;
 
@@ -74,7 +74,7 @@ StationChatConfig BuildConfiguration(int argc, const char* argv[]) {
             "port for registrar connections")
         ("bind_to_ip", po::value<bool>(&config.bindToIp)->default_value(false),
             "when set to true, binds to the config address; otherwise, binds on any interface")
-        ("database_path", po::value<std::string>(&config.chatDatabasePath)->default_value("chat.db"),
+        ("database_path", po::value<std::string>(&config.chatDatabasePath)->default_value("var/stationapi/stationchat.db"),
             "path to the sqlite3 database file")
         ;
 
