@@ -11,7 +11,7 @@ registrar_address = 127.0.0.1
 registrar_port = 5000
 
 # Path to the application database
-database_path = chat.db
+database_path = var/stationapi/stationchat.db
 
 # When set to true, binds to the config address; otherwise, binds on any interface
 bind_to_ip = false
