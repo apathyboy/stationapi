@@ -11,7 +11,7 @@
     FILENAME = "var/log/swgchat.log"
 * WARNING:
     FILENAME = "var/log/swgchat.log"
-* INFO:546
+* INFO:
     FILENAME = "var/log/swgchat.log"
 * VERBOSE:
     FILENAME = "var/log/verbose.%datetime{%Y%M%d_%H%m%s}.log"
