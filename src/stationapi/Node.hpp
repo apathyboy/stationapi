@@ -38,7 +38,7 @@ public:
 
         auto remove_iter
             = std::remove_if(std::begin(clients_), std::end(clients_), [](auto& client) {
-                  return client->GetConnection()->GetStatus() == UdpConnection::cStatusDisconnected;
+                 return client->GetConnection()->GetStatus() == UdpConnection::cStatusDisconnected || client == std::end(clients_);
               });
 
         if (remove_iter != std::end(clients_))

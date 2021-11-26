@@ -72,6 +72,7 @@ void ChatAvatarService::LoginAvatar(ChatAvatar* avatar) {
 }
 
 void ChatAvatarService::LogoutAvatar(ChatAvatar* avatar) {
+	if(!avatar->isOnline_) return;
     avatar->isOnline_ = false;
 
     onlineAvatars_.erase(std::remove_if(
