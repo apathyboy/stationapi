@@ -57,18 +57,19 @@ AddBan::AddBan(GatewayClient* client, const RequestType& request, ResponseType& 
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto bannedAvatar
         = avatarService_->GetAvatar(request.destAvatarName, request.destAvatarAddress);
     if (!bannedAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destAvatarName) + " : " +
+                FromWideString(request.destAvatarAddress)).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str()};
     }
 
     response.destRoomId = room->GetRoomId();
@@ -83,12 +84,12 @@ AddFriend::AddFriend(GatewayClient* client, const RequestType& request, Response
               << FromWideString(request.srcAddress);
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto destAvatar = avatarService_->GetAvatar(request.destName, request.destAddress);
     if (!destAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destName) + " : " + FromWideString(request.destAddress)).c_str()};
     }
 
     srcAvatar->AddFriend(destAvatar);
@@ -105,12 +106,12 @@ AddIgnore::AddIgnore(GatewayClient* client, const RequestType& request, Response
               << FromWideString(request.srcAddress);
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto destAvatar = avatarService_->GetAvatar(request.destName, request.destAddress);
     if (!destAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destName) + " : " + FromWideString(request.destAddress)).c_str()};
     }
 
     srcAvatar->AddIgnore(destAvatar);
@@ -126,18 +127,18 @@ AddInvite::AddInvite(GatewayClient* client, const RequestType& request, Response
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto invitedAvatar
         = avatarService_->GetAvatar(request.destAvatarName, request.destAvatarAddress);
     if (!invitedAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destAvatarName) + " : " + FromWideString(request.destAvatarAddress)).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str()};
     }
 
     response.destRoomId = room->GetRoomId();
@@ -156,18 +157,18 @@ AddModerator::AddModerator(
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto moderatorAvatar
         = avatarService_->GetAvatar(request.destAvatarName, request.destAvatarAddress);
     if (!moderatorAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destAvatarName) + " : " + FromWideString(request.destAvatarAddress)).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str()};
     }
 
     response.destRoomId = room->GetRoomId();
@@ -193,7 +194,7 @@ DestroyAvatar::DestroyAvatar(
     , roomService_{client->GetNode()->GetRoomService()} {
     auto avatar = avatarService_->GetAvatar(request.avatarId);
     if (!avatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.avatarId).c_str()};
     }
 
     // Remove From All Rooms
@@ -217,12 +218,12 @@ DestroyRoom::DestroyRoom(GatewayClient* client, const RequestType& request, Resp
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException(ChatResultCode::SRCAVATARDOESNTEXIST);
+        throw ChatResultException(ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str());
     }
 
     auto room = roomService_->GetRoom(request.roomAddress);
     if (!room) {
-        throw ChatResultException(ChatResultCode::ADDRESSNOTROOM);
+        throw ChatResultException(ChatResultCode::ADDRESSNOTROOM, FromWideString(request.roomAddress).c_str());
     }
 
     auto addresses = room->GetRemoteAddresses();
@@ -244,12 +245,12 @@ EnterRoom::EnterRoom(GatewayClient* client, const RequestType& request, Response
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     response.room = roomService_->GetRoom(request.roomAddress);
     if (!response.room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.roomAddress).c_str()};
     }
 
     response.roomId = response.room->GetRoomId();
@@ -297,7 +298,7 @@ FriendStatus::FriendStatus(
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     response.srcAvatar = srcAvatar;
@@ -311,7 +312,8 @@ GetAnyAvatar::GetAnyAvatar(
 
     auto avatar = avatarService_->GetAvatar(request.name, request.address);
     if (!avatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, (FromWideString(request.name) + " : " +
+                FromWideString(request.address)).c_str()};
     }
 
     response.isOnline = avatar->IsOnline();
@@ -343,7 +345,7 @@ GetRoom::GetRoom(GatewayClient* client, const RequestType& request, ResponseType
 
     auto room = roomService_->GetRoom(request.roomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::ADDRESSDOESNTEXIST, FromWideString(request.roomAddress).c_str()};
     }
 
     response.room = room;
@@ -367,7 +369,7 @@ IgnoreStatus::IgnoreStatus(
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     response.srcAvatar = srcAvatar;
@@ -382,17 +384,17 @@ KickAvatar::KickAvatar(GatewayClient* client, const RequestType& request, Respon
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto destAvatar = avatarService_->GetAvatar(request.destAvatarName, request.destAvatarAddress);
     if (!destAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destAvatarName) + " : " + FromWideString(request.destAvatarAddress)).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str()};
     }
 
     response.destRoomId = room->GetRoomId();
@@ -408,12 +410,12 @@ LeaveRoom::LeaveRoom(GatewayClient* client, const RequestType& request, Response
     , roomService_{client->GetNode()->GetRoomService()} {
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.roomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.roomAddress).c_str()};
     }
 
     response.roomId = room->GetRoomId();
@@ -490,18 +492,18 @@ RemoveBan::RemoveBan(GatewayClient* client, const RequestType& request, Response
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto bannedAvatar
         = avatarService_->GetAvatar(request.destAvatarName, request.destAvatarAddress);
     if (!bannedAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destAvatarName) + " : " + FromWideString(request.destAvatarAddress)).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str()};
     }
 
     response.destRoomId = room->GetRoomId();
@@ -518,12 +520,12 @@ RemoveFriend::RemoveFriend(
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto destAvatar = avatarService_->GetAvatar(request.destName, request.destAddress);
     if (!destAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destName) + " : " + FromWideString(request.destAddress)).c_str()};
     }
 
     srcAvatar->RemoveFriend(destAvatar);
@@ -537,12 +539,12 @@ RemoveIgnore::RemoveIgnore(GatewayClient* client, const RequestType& request, Re
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto destAvatar = avatarService_->GetAvatar(request.destName, request.destAddress);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destName) + " : " + FromWideString(request.destAddress)).c_str()};
     }
 
     srcAvatar->RemoveIgnore(destAvatar);
@@ -559,18 +561,18 @@ RemoveInvite::RemoveInvite(
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto invitedAvatar
         = avatarService_->GetAvatar(request.destAvatarName, request.destAvatarAddress);
     if (!invitedAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destAvatarName) + " : " + FromWideString(request.destAvatarAddress)).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str()};
     }
 
     response.destRoomId = room->GetRoomId();
@@ -586,17 +588,17 @@ RemoveModerator::RemoveModerator(GatewayClient* client, const RequestType& reque
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
     }
 
     auto moderatorAvatar = avatarService_->GetAvatar(request.destAvatarName, request.destAvatarAddress);
     if (!moderatorAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destAvatarName) + " : " + FromWideString(request.destAvatarAddress)).c_str()};
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM};
+        throw ChatResultException{ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str()};
     }
 
     response.destRoomId = room->GetRoomId();
@@ -613,12 +615,12 @@ SendInstantMessage::SendInstantMessage(
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException(ChatResultCode::SRCAVATARDOESNTEXIST);
+        throw ChatResultException(ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str());
     }
 
     auto destAvatar = avatarService_->GetAvatar(request.destName, request.destAddress);
     if (!destAvatar) {
-        throw ChatResultException(ChatResultCode::DESTAVATARDOESNTEXIST);
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destName) + " : " + FromWideString(request.destAddress)).c_str()};
     }
 
     if (destAvatar->IsIgnored(srcAvatar)) {
@@ -635,7 +637,7 @@ SendPersistentMessage::SendPersistentMessage(GatewayClient* client, const Reques
 
     auto destAvatar = avatarService_->GetAvatar(request.destName, request.destAddress);
     if (!destAvatar) {
-        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::DESTAVATARDOESNTEXIST, (FromWideString(request.destName) + " : " + FromWideString(request.destAddress)).c_str()};
     }
 
     PersistentMessage message;
@@ -643,11 +645,11 @@ SendPersistentMessage::SendPersistentMessage(GatewayClient* client, const Reques
     if (request.avatarPresence) {
         auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
         if (!srcAvatar) {
-            throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+            throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str()};
         }
 
         if (destAvatar->IsIgnored(srcAvatar)) {
-            throw ChatResultException(ChatResultCode::IGNORING);
+            throw ChatResultException(ChatResultCode::IGNORING, (std::to_string(destAvatar->GetAvatarId()) + " : " + std::to_string(srcAvatar->GetAvatarId())).c_str());
         }
 
         message.header.fromName = srcAvatar->GetName();
@@ -681,12 +683,12 @@ SendRoomMessage::SendRoomMessage(
 
     auto srcAvatar = avatarService_->GetAvatar(request.srcAvatarId);
     if (!srcAvatar) {
-        throw ChatResultException(ChatResultCode::SRCAVATARDOESNTEXIST);
+        throw ChatResultException(ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.srcAvatarId).c_str());
     }
 
     auto room = roomService_->GetRoom(request.destRoomAddress);
     if (!room) {
-        throw ChatResultException(ChatResultCode::ADDRESSNOTROOM);
+        throw ChatResultException(ChatResultCode::ADDRESSNOTROOM, FromWideString(request.destRoomAddress).c_str());
     }
 
     response.roomId = room->GetRoomId();
@@ -710,7 +712,7 @@ SetAvatarAttributes::SetAvatarAttributes(GatewayClient* client, const RequestTyp
 
     auto avatar = avatarService_->GetAvatar(request.avatarId);
     if (!avatar) {
-        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST};
+        throw ChatResultException{ChatResultCode::SRCAVATARDOESNTEXIST, std::to_string(request.avatarId).c_str()};
     }
 
     response.avatar = avatar;
