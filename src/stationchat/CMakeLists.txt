@@ -34,6 +34,7 @@ add_executable(stationchat
     protocol/SetApiVersion.hpp
     protocol/SetAvatarAttributes.hpp
     protocol/UpdatePersistentMessage.hpp
+    protocol/UpdatePersistentMessages.hpp
 
     ChatAvatar.cpp
     ChatAvatar.hpp

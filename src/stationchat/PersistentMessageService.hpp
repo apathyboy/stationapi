@@ -25,6 +25,9 @@ public:
     void UpdateMessageStatus(
         uint32_t avatarId, uint32_t messageId, PersistentState status);
 
+    void BulkUpdateMessageStatus(
+        uint32_t avatarId, const std::u16string& category, PersistentState newStatus);
+
 private:
     sqlite3* db_;
 };

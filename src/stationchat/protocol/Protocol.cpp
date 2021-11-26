@@ -43,6 +43,7 @@
 #include "protocol/SetApiVersion.hpp"
 #include "protocol/SetAvatarAttributes.hpp"
 #include "protocol/UpdatePersistentMessage.hpp"
+#include "protocol/UpdatePersistentMessages.hpp"
 
 #include "easylogging++.h"
 
@@ -728,4 +729,12 @@ UpdatePersistentMessage::UpdatePersistentMessage(GatewayClient* client, const Re
     LOG(INFO) << "UPDATEPERSISTENTMESSAGE request received";
     messageService_->UpdateMessageStatus(
         request.srcAvatarId, request.messageId, request.status);
+}
+
+UpdatePersistentMessages::UpdatePersistentMessages(GatewayClient *client, const RequestType &request, ResponseType &response)
+    : messageService_{client->GetNode()->GetMessageService()}
+{
+    LOG(INFO) << "UPDATEPERSISTENTMESSAGES request received";
+    messageService_->BulkUpdateMessageStatus(
+            request.srcAvatarId, request.category, request.newStatus);
 }

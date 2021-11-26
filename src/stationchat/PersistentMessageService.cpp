@@ -208,3 +208,32 @@ void PersistentMessageService::UpdateMessageStatus(
 
     sqlite3_finalize(stmt);
 }
+
+void PersistentMessageService::BulkUpdateMessageStatus(
+    uint32_t avatarId, const std::u16string& category, PersistentState newStatus)
+{
+    sqlite3_stmt* stmt;
+
+    char sql[] = "UPDATE persistent_message SET status = @status WHERE avatar_id = @avatar_id AND "
+             "category = @category";
+
+    auto result = sqlite3_prepare_v2(db_, sql, -1, &stmt, 0);
+    if (result != SQLITE_OK) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+
+    int statusIdx = sqlite3_bind_parameter_index(stmt, "@status");
+    int avatarIdIdx = sqlite3_bind_parameter_index(stmt, "@avatar_id");
+    int categoryIdx = sqlite3_bind_parameter_index(stmt, "@category");
+
+    sqlite3_bind_int(stmt, statusIdx, static_cast<uint32_t>(newStatus));
+    sqlite3_bind_int(stmt, avatarIdIdx, avatarId);
+    std::string cat = FromWideString(category);
+    sqlite3_bind_text(stmt, categoryIdx, cat.c_str(), -1, nullptr);
+
+    result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        throw SQLite3Exception{result, sqlite3_errmsg(db_)};
+    }
+    sqlite3_finalize(stmt);
+}
