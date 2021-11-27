@@ -34,6 +34,7 @@ add_executable(
   protocol/SetApiVersion.hpp
   protocol/SetAvatarAttributes.hpp
   protocol/UpdatePersistentMessage.hpp
+  protocol/UpdatePersistentMessages.hpp
   ChatAvatar.cpp
   ChatAvatar.hpp
   ChatAvatarService.cpp
@@ -60,7 +61,7 @@ add_executable(
   StationChatApp.cpp
   StationChatApp.hpp
   StationChatConfig.hpp)
-
+  
 # cmake-format: off
 target_link_libraries(stationchat
     stationapi

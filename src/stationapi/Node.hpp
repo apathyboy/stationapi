@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 template <typename NodeT, typename ClientT>
 class Node : public UdpManagerHandler

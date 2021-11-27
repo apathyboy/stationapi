@@ -42,6 +42,7 @@
 #include "protocol/SetApiVersion.hpp"
 #include "protocol/SetAvatarAttributes.hpp"
 #include "protocol/UpdatePersistentMessage.hpp"
+#include "protocol/UpdatePersistentMessages.hpp"
 
 #include "easylogging++.h"
 
@@ -137,6 +138,9 @@ void GatewayClient::OnIncoming(std::istringstream& istream) {
         break;
     case ChatRequestType::UPDATEPERSISTENTMESSAGE:
         HandleIncomingMessage<UpdatePersistentMessage>(istream);
+        break;
+    case ChatRequestType::UPDATEPERSISTENTMESSAGES:
+        HandleIncomingMessage<UpdatePersistentMessages>(istream);
         break;
     case ChatRequestType::IGNORESTATUS:
         HandleIncomingMessage<IgnoreStatus>(istream);
