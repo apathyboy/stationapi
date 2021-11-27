@@ -65,7 +65,6 @@ add_executable(
 # cmake-format: off
 target_link_libraries(stationchat
     stationapi
-	udplibrary
     ${Boost_LIBRARIES}
     ${SQLite3_LIBRARY}
     $<$<PLATFORM_ID:Windows>:ws2_32>)
